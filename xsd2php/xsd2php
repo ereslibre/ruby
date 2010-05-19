@@ -176,7 +176,7 @@ class PHPClass
     writeToFile(file) { "\t\t$res += $query;\n" }
     writeToFile(file) { "\t\t$res += \"</command>\";\n" }
     writeToFile(file) { "\t\treturn $res;\n" }
-    writeToFile(file) {  "\t}\n" }
+    writeToFile(file) { "\t}\n" }
   end
 
   def writeClass
