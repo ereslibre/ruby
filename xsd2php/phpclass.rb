@@ -38,11 +38,11 @@ class PHPClass
     contents.each { | key, value |
       if key == "simpleType"
         value.each { | currKey, currValue |
-          @simpleTypes[currKey] = SimpleType.new(currKey, currValue["restriction"])
+          @simpleTypes[currKey] = SimpleType.new("#{@xsdClassName}:#{currKey}", currValue["restriction"])
         }
       elsif key == "complexType"
         value.each { | currKey, currValue |
-          @complexTypes[currKey] = ComplexType.new(currKey, currValue)
+          @complexTypes[currKey] = ComplexType.new("#{@xsdClassName}:#{currKey}", currValue)
         }
       elsif key == "element"
         value.each { | currKey, currValue |
