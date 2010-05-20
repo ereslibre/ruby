@@ -158,7 +158,7 @@ class PHPClass
     }
   end
 
-  def writeClass
+  def writeClass(phpClasses)
     file = File.new("#{@destination}/#{@className.downcase}.php", "w")
     writeToFile(file) { "<?php\n\n" }
     writeHeader(file)
@@ -227,7 +227,7 @@ fileContents.each { | contents |
 }
 
 phpClasses.each { |phpClass|
-  phpClass.writeClass
+  phpClass.writeClass(phpClasses)
 }
 
 ####################################################################################################
