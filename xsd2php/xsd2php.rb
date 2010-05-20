@@ -156,8 +156,19 @@ class PHPClass
         }
       end
     }
-    writeClass
   end
+
+  def writeClass
+    file = File.new("#{@destination}/#{@className.downcase}.php", "w")
+    writeToFile(file) { "<?php\n\n" }
+    writeHeader(file)
+    writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n\n" }
+    writeElements(file)
+    writeXMLGenerator(file)
+    file.close
+  end
+
+  private
 
   def writeElements(file)
     @elements.each { |element|
@@ -177,16 +188,6 @@ class PHPClass
     writeToFile(file) { "\t\t$res += \"</command>\";\n" }
     writeToFile(file) { "\t\treturn $res;\n" }
     writeToFile(file) { "\t}\n" }
-  end
-
-  def writeClass
-    file = File.new("#{@destination}/#{@className}.php", "w")
-    writeToFile(file) { "<?php\n\n" }
-    writeHeader(file)
-    writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n\n" }
-    writeElements(file)
-    writeXMLGenerator(file)
-    file.close
   end
 
 end
@@ -220,8 +221,13 @@ for file in fileList
   fileContents << XmlSimple.xml_in(file, { "KeyAttr" => "name" })
 end
 
+phpClasses = Array.new
 fileContents.each { | contents |
-  PHPClass.new(destination, contents)
+  phpClasses << PHPClass.new(destination, contents)
+}
+
+phpClasses.each { |phpClass|
+  phpClass.writeClass
 }
 
 ####################################################################################################
