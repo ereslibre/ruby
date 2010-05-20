@@ -17,6 +17,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+require "pp"
 require "utils"
 require "element"
 require "simpletype"
@@ -25,11 +26,12 @@ require "restriction"
 
 class PHPClass
 
-  attr_reader :className, :simpleTypes, :elements
+  attr_reader :xsdClassName, :className, :simpleTypes, :elements
 
   def initialize(destination, contents)
     @destination = destination
-    @className = contents["targetNamespace"].slice(/^((.*):)*([a-zA-Z0-9_]*)/, 3).downcase.capitalize
+    @xsdClassName = contents["targetNamespace"].slice(/^((.*):)*([a-zA-Z0-9_]*)/, 3)
+    @className = @xsdClassName.downcase.capitalize
     @simpleTypes = Hash.new
     @complexTypes = Hash.new
     @elements = Array.new
@@ -55,14 +57,14 @@ class PHPClass
     writeToFile(file) { "<?php\n\n" }
     writeHeader(file)
     writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n\n" }
-    writeElements(file)
+    writeElements(file, phpClasses)
     writeXMLGenerator(file)
     file.close
   end
 
   private
 
-  def writeElements(file)
+  def writeElements(file, phpClasses)
     @elements.each { |element|
       writeToFile(file) { "\tpublic function do#{element.name.capitalize}() {\n"  }
       writeToFile(file) { "\t}\n\n" }
