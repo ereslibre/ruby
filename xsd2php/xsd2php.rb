@@ -137,7 +137,7 @@ class PHPClass
 
   def initialize(destination, contents)
     @destination = destination
-    @className = contents["targetNamespace"].slice(/^((.*):)*([a-zA-Z0-9_]*)/, 3).capitalize
+    @className = contents["targetNamespace"].slice(/^((.*):)*([a-zA-Z0-9_]*)/, 3).downcase.capitalize
     @simpleTypes = Hash.new
     @complexTypes = Hash.new
     @elements = Array.new
