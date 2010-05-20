@@ -19,10 +19,21 @@
 
 class ComplexType
 
-  attr_reader :name
+  attr_reader :name, :sequence
 
   def initialize(name, attributes)
     @name = name
+    attributes.each { | key, value |
+      if key == "sequence"
+        subAttributes = value[0]
+        pp subAttributes
+      elsif key == "simpleContent"
+      elsif key == "choice"
+      elsif key == "attribute"
+      elsif key == "mixed"
+      elsif key == "anyAttribute"
+      end
+    }
   end
 
 end
