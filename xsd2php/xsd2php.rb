@@ -48,7 +48,7 @@ rootDir.close
 
 FileUtils.mkdir_p(destination)
 
-progress = ProgressBar.new("Generating...", fileList.count * 3)
+progress = ProgressBar.new("Generating", fileList.count * 3)
 
 fileContents = Array.new
 for file in fileList
