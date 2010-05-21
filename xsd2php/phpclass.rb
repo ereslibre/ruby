@@ -43,25 +43,25 @@ class PHPClass
     @simpleTypes = Hash.new
     @complexTypes = Hash.new
     @elements = Array.new
-    contents.each { | key, value |
+    for key, value in contents
       if key == "simpleType"
-        value.each { | currKey, currValue |
+        for currKey, currValue in value
           simpleType = SimpleType.new("#{@xsdClassName}:#{currKey}", currValue["restriction"])
           @simpleTypes[currKey] = simpleType
           @@globalSimpleTypes["#{@xsdClassName}:#{currKey}"] = simpleType
-        }
+        end
       elsif key == "complexType"
-        value.each { | currKey, currValue |
+        for currKey, currValue in value
           complexType = ComplexType.new("#{@xsdClassName}:#{currKey}", currValue)
           @complexTypes[currKey] = complexType
           @@globalComplexTypes["#{@xsdClassName}:#{currKey}"] = complexType
-        }
+        end
       elsif key == "element"
-        value.each { | currKey, currValue |
+        for currKey, currValue in value
           @elements << Element.new(currKey, currValue["type"])
-        }
+        end
       end
-    }
+    end
   end
 
   def writeClass(phpClasses)
@@ -79,11 +79,11 @@ class PHPClass
   private
 
   def writeElements(file, phpClasses)
-    @elements.each { |element|
+    for element in @elements
       type = self.type(element.type)
       writeToFile(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       writeToFile(file) { "\t}\n\n" }
-    }
+    end
   end
 
   def writeXMLGenerator(file)

@@ -26,19 +26,19 @@ class ComplexType
   def initialize(name, contents)
     @name = name
     @attributes = Array.new
-    contents.each { | key, value |
+    for key, value in contents
       if key == "sequence"
         subContents = value[0]["element"] # TODO: Check for "any" too
-        subContents.each { | key, value |
+        for key, value in subContents
           @attributes << Attribute.new(key, value["type"])
-        } if subContents
+        end if subContents
       elsif key == "simpleContent"
       elsif key == "choice"
       elsif key == "attribute"
       elsif key == "mixed"
       elsif key == "anyAttribute"
       end
-    }
+    end
   end
 
 end

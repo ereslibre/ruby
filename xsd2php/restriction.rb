@@ -37,9 +37,9 @@ class Restriction
     end
     if restriction.has_key?("enumeration")
       @enumeration = Array.new
-      restriction["enumeration"].each { | value |
+      for value in restriction["enumeration"]
         @enumeration << value["value"]
-      }
+      end
     end
   end
 

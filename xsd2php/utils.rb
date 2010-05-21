@@ -22,9 +22,9 @@ require "globals"
 def fileToString(file)
   f = File.open(file, "r")
   contents = ""
-  f.each { |line|
+  for line in f
     contents << line
-  }
+  end
   f.close
   return contents
 end

@@ -50,10 +50,10 @@ for file in fileList
 end
 
 phpClasses = Array.new
-fileContents.each { | contents |
+for contents in fileContents
   phpClasses << PHPClass.new(destination, contents)
-}
+end
 
-phpClasses.each { |phpClass|
+for phpClass in phpClasses
   phpClass.writeClass(phpClasses)
-}
+end

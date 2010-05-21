@@ -24,9 +24,9 @@ class SimpleType
   def initialize(name, restrictions)
     @name = name
     @restrictions = Array.new
-    restrictions.each { | restriction |
+    for restriction in restrictions
       @restrictions << Restriction.new(restriction)
-    }
+    end
   end
 
 end
