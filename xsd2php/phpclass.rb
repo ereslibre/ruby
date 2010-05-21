@@ -72,7 +72,7 @@ class PHPClass
     writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n" }
     writeElements(file, phpClasses)
     writeXMLGenerator(file)
-    writeToFile(file) { "}\n" }
+    writeToFile(file) { "}\n\n?>\n" }
     file.close
   end
 
