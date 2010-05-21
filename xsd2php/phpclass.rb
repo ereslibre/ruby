@@ -65,10 +65,11 @@ class PHPClass
   end
 
   def writeClass(phpClasses)
+    return if @elements.empty?
     file = File.new("#{@destination}/#{@className.downcase}.php", "w")
     writeToFile(file) { "<?php\n\n" }
     writeHeader(file)
-    writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n\n" }
+    writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n" }
     writeElements(file, phpClasses)
     writeXMLGenerator(file)
     writeToFile(file) { "}\n" }
