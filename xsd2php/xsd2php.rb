@@ -24,6 +24,7 @@ require "find"
 require "colorize"
 require "xmlsimple"
 require "fileutils"
+require "progressbar"
 
 require "phpclass"
 
@@ -47,20 +48,26 @@ rootDir.close
 
 FileUtils.mkdir_p(destination)
 
+progress = ProgressBar.new("Generating...", fileList.count * 3)
+
 fileContents = Array.new
 for file in fileList
   fileContents << XmlSimple.xml_in(file, { "KeyAttr" => "name" })
+  progress.inc
 end
 
 phpClasses = Array.new
 for contents in fileContents
   phpClasses << PHPClass.new(destination, contents)
+  progress.inc
 end
 
 for phpClass in phpClasses
   phpClass.writeClass(phpClasses)
+  progress.inc
 end
 
+puts
 puts "***".light_green
 puts "*** Successful generation".light_green
 puts "***".light_green
