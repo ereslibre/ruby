@@ -17,16 +17,21 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+require "attribute"
+
 class ComplexType
 
-  attr_reader :name, :sequence
+  attr_reader :name, :sequence, :attributes
 
-  def initialize(name, attributes)
+  def initialize(name, contents)
     @name = name
-    attributes.each { | key, value |
+    @attributes = Array.new
+    contents.each { | key, value |
       if key == "sequence"
-        subAttributes = value[0]
-        pp subAttributes
+        subContents = value[0]["element"] # TODO: Check for "any" too
+        subContents.each { | key, value |
+          @attributes << Attribute.new(key, value["type"])
+        } if subContents
       elsif key == "simpleContent"
       elsif key == "choice"
       elsif key == "attribute"

@@ -26,7 +26,15 @@ require "restriction"
 
 class PHPClass
 
-  attr_reader :xsdClassName, :className, :simpleTypes, :elements
+  attr_reader :xsdClassName, :className, :simpleTypes, :complexTypes, :elements
+
+  @@globalSimpleTypes = Hash.new
+  @@globalComplexTypes = Hash.new
+
+  def type(typeName)
+    return @@globalComplexTypes[typeName] if @@globalComplexTypes.has_key?(typeName)
+    @@globalSimpleTypes[typeName] if @@globalSimpleTypes.has_key?(typeName)
+  end
 
   def initialize(destination, contents)
     @destination = destination
@@ -38,11 +46,15 @@ class PHPClass
     contents.each { | key, value |
       if key == "simpleType"
         value.each { | currKey, currValue |
-          @simpleTypes[currKey] = SimpleType.new("#{@xsdClassName}:#{currKey}", currValue["restriction"])
+          simpleType = SimpleType.new("#{@xsdClassName}:#{currKey}", currValue["restriction"])
+          @simpleTypes[currKey] = simpleType
+          @@globalSimpleTypes["#{@xsdClassName}:#{currKey}"] = simpleType
         }
       elsif key == "complexType"
         value.each { | currKey, currValue |
-          @complexTypes[currKey] = ComplexType.new("#{@xsdClassName}:#{currKey}", currValue)
+          complexType = ComplexType.new("#{@xsdClassName}:#{currKey}", currValue)
+          @complexTypes[currKey] = complexType
+          @@globalComplexTypes["#{@xsdClassName}:#{currKey}"] = complexType
         }
       elsif key == "element"
         value.each { | currKey, currValue |
@@ -59,6 +71,7 @@ class PHPClass
     writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n\n" }
     writeElements(file, phpClasses)
     writeXMLGenerator(file)
+    writeToFile(file) { "}\n" }
     file.close
   end
 
@@ -66,7 +79,8 @@ class PHPClass
 
   def writeElements(file, phpClasses)
     @elements.each { |element|
-      writeToFile(file) { "\tpublic function do#{element.name.capitalize}() {\n"  }
+      type = self.type(element.type)
+      writeToFile(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       writeToFile(file) { "\t}\n\n" }
     }
   end
