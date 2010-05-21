@@ -1,1 +1,2 @@
 gem install xml-simple
+gem install colorize

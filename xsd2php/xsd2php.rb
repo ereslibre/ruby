@@ -21,6 +21,7 @@
 $: << File.expand_path(File.dirname(__FILE__))
 
 require "find"
+require "colorize"
 require "xmlsimple"
 require "fileutils"
 
@@ -59,3 +60,9 @@ end
 for phpClass in phpClasses
   phpClass.writeClass(phpClasses)
 end
+
+puts "***".light_green
+puts "*** Successful generation".light_green
+puts "***".light_green
+puts "*** Destination: #{File.expand_path(destination)}".light_green
+puts "***".light_green
