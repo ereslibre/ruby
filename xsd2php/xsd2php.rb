@@ -18,6 +18,8 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+$: << File.expand_path(File.dirname(__FILE__))
+
 require "find"
 require "xmlsimple"
 require "fileutils"
