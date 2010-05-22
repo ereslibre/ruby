@@ -19,11 +19,12 @@
 
 class Element
 
-  attr_reader :name, :type
+  attr_reader :name, :type, :xsdClassName
 
-  def initialize(name, type)
+  def initialize(name, type, xsdClassName)
     @name = name
     @type = type
+    @xsdClassName = xsdClassName
   end
 
 end

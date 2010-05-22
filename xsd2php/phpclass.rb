@@ -58,7 +58,7 @@ class PHPClass
         end
       elsif key == "element"
         for currKey, currValue in value
-          @elements << Element.new(currKey, currValue["type"])
+          @elements << Element.new(currKey, currValue["type"], @xsdClassName)
         end
       end
     end
@@ -82,6 +82,10 @@ class PHPClass
     for element in @elements
       type = self.type(element.type)
       writeToFile(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
+      writeToFile(file) { "\t\t$query += \"<#{element.name}>\";\n" }
+      writeToFile(file) { "\t\t$query += \"<#{element.xsdClassName}:#{element.name}>\";\n" }
+      writeToFile(file) { "\t\t$query += \"</#{element.xsdClassName}:#{element.name}>\";\n" }
+      writeToFile(file) { "\t\t$query += \"</#{element.name}>\";\n" }
       writeToFile(file) { "\t}\n\n" }
     end
   end
