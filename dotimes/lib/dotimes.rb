@@ -18,7 +18,7 @@
 ##
 
 def doTimes(n, &block)
-	n.times {
+	n.times do
 		block.call
-	}
+	end
 end
