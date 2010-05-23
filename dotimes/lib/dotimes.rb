@@ -17,6 +17,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
+#
+# Takes a block of code and repeats it n times.
+#
+#	doTimes(5) { puts "Hello, world !!" }
+#
 def doTimes(n, &block)
 	n.times do
 		block.call
