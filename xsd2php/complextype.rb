@@ -28,10 +28,10 @@ class ComplexType
     @attributes = Array.new
     for key, value in contents
       if key == "sequence"
-        subContents = value[0]["element"] # TODO: Check for "any" too
-        for key, value in subContents
+        sub_contents = value[0]["element"] # TODO: Check for "any" too
+        for key, value in sub_contents
           @attributes << Attribute.new(key, value["type"])
-        end if subContents
+        end if sub_contents
       elsif key == "simpleContent"
       elsif key == "choice"
       elsif key == "attribute"

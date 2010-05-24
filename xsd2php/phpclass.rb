@@ -26,81 +26,81 @@ require "restriction"
 
 class PHPClass
 
-  attr_reader :xsdClassName, :className, :simpleTypes, :complexTypes, :elements
+  attr_reader :xsd_class_name, :class_name, :simple_types, :complex_types, :elements
 
-  @@globalSimpleTypes = Hash.new
-  @@globalComplexTypes = Hash.new
+  @@global_simple_types = Hash.new
+  @@global_complex_types = Hash.new
 
-  def type(typeName)
-    return @@globalComplexTypes[typeName] if @@globalComplexTypes.has_key?(typeName)
-    @@globalSimpleTypes[typeName] if @@globalSimpleTypes.has_key?(typeName)
+  def type(type_name)
+    return @@global_complex_types[type_name] if @@global_complex_types.has_key?(type_name)
+    @@global_simple_types[type_name] if @@global_simple_types.has_key?(type_name)
   end
 
   def initialize(destination, contents)
     @destination = destination
-    @xsdClassName = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3)
-    @className = @xsdClassName.downcase.capitalize
-    @simpleTypes = Hash.new
-    @complexTypes = Hash.new
+    @xsd_class_name = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3)
+    @class_name = @xsd_class_name.downcase.capitalize
+    @simple_types = Hash.new
+    @complex_types = Hash.new
     @elements = Array.new
     for key, value in contents
       if key == "simpleType"
-        for currKey, currValue in value
-          simpleType = SimpleType.new("#{@xsdClassName}:#{currKey}", currValue["restriction"])
-          @simpleTypes[currKey] = simpleType
-          @@globalSimpleTypes["#{@xsdClassName}:#{currKey}"] = simpleType
+        for curr_key, curr_value in value
+          simple_type = SimpleType.new("#{@xsd_class_name}:#{curr_key}", curr_value["restriction"])
+          @simple_types[curr_key] = simple_type
+          @@global_simple_types["#{@xsd_class_name}:#{curr_key}"] = simple_type
         end
       elsif key == "complexType"
-        for currKey, currValue in value
-          complexType = ComplexType.new("#{@xsdClassName}:#{currKey}", currValue)
-          @complexTypes[currKey] = complexType
-          @@globalComplexTypes["#{@xsdClassName}:#{currKey}"] = complexType
+        for curr_key, curr_value in value
+          complex_type = ComplexType.new("#{@xsd_class_name}:#{curr_key}", curr_value)
+          @complex_types[curr_key] = complex_type
+          @@global_complex_types["#{@xsd_class_name}:#{curr_key}"] = complex_type
         end
       elsif key == "element"
-        for currKey, currValue in value
-          @elements << Element.new(currKey, currValue["type"], @xsdClassName)
+        for curr_key, curr_value in value
+          @elements << Element.new(curr_key, curr_value["type"], @xsd_class_name)
         end
       end
     end
   end
 
-  def writeClass(phpClasses)
+  def write_class(php_classes)
     return if @elements.empty?
-    file = File.new("#{@destination}/#{@className.downcase}.php", "w")
-    writeToFile(file) { "<?php\n\n" }
-    writeHeader(file)
-    writeToFile(file) { "class #{@className}\n{\n\tprivate $query = \"\";\n\n" }
-    writeElements(file, phpClasses)
-    writeXMLGenerator(file)
-    writeToFile(file) { "}\n\n?>\n" }
+    file = File.new("#{@destination}/#{@class_name.downcase}.php", "w")
+    write_to_file(file) { "<?php\n\n" }
+    write_header(file)
+    write_to_file(file) { "class #{@class_name}\n{\n\tprivate $query = \"\";\n\n" }
+    write_elements(file, php_classes)
+    write_xml_generator(file)
+    write_to_file(file) { "}\n\n?>\n" }
     file.close
   end
 
   private
 
-  def writeElements(file, phpClasses)
+  def write_elements(file, php_classes)
     for element in @elements
       type = self.type(element.type)
-      writeToFile(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
-      writeToFile(file) { "\t\t$query += \"<#{element.name}>\";\n" }
-      writeToFile(file) { "\t\t$query += \"<#{element.xsdClassName}:#{element.name}>\";\n" }
-      writeToFile(file) { "\t\t$query += \"</#{element.xsdClassName}:#{element.name}>\";\n" }
-      writeToFile(file) { "\t\t$query += \"</#{element.name}>\";\n" }
-      writeToFile(file) { "\t}\n\n" }
+      write_to_file(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
+      write_to_file(file) { "\t\t$query += \"<#{element.name}>\";\n" }
+      write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
+      write_to_file(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
+      write_to_file(file) { "\t\t$query += \"</#{element.name}>\";\n" }
+      write_to_file(file) { "\t}\n\n" }
     end
   end
 
-  def writeXMLGenerator(file)
-    writeToFile(file) { "\tpublic function generateXML() {\n" }
-    writeToFile(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
-    writeToFile(file) { "\t\t$res += \"<epp xmlns=\\\"urn:ietf:params:xml:ns:epp-1.0\\\" " \
+  def write_xml_generator(file)
+    write_to_file(file) { "\tpublic function generateXML() {\n" }
+    write_to_file(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
+    write_to_file(file) { "\t\t$res += \"<epp xmlns=\\\"urn:ietf:params:xml:ns:epp-1.0\\\" " \
       "xmlns:domain=\\\"urn:ietf:params:xml:ns:domain-1.0\\\" " \
       "xmlns:es_creds=\\\"urn:red.es:xml:ns:es_creds-1.0\\\">\";\n" }
-    writeToFile(file) { "\t\t$res += \"<command>\";\n" }
-    writeToFile(file) { "\t\t$res += $query;\n" }
-    writeToFile(file) { "\t\t$res += \"</command>\";\n" }
-    writeToFile(file) { "\t\treturn $res;\n" }
-    writeToFile(file) { "\t}\n" }
+    write_to_file(file) { "\t\t$res += \"<command>\";\n" }
+    write_to_file(file) { "\t\t$res += $query;\n" }
+    write_to_file(file) { "\t\t$res += \"</command>\";\n" }
+    write_to_file(file) { "\t\treturn $res;\n" }
+    write_to_file(file) { "\t}\n" }
   end
 
 end

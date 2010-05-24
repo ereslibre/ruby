@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-def makeSetter(*names)
+def make_setter(*names)
   for name in names
     eval <<-SETTER
     def #{name}=(arg)
@@ -11,7 +11,7 @@ def makeSetter(*names)
   end
 end
 
-def makeGetter(*names)
+def make_getter(*names)
   for name in names
     eval <<-GETTER
     def #{name}
@@ -24,8 +24,8 @@ end
 
 class Test
 
-  makeSetter :example, :example2
-  makeGetter :example, :example2
+  make_setter :example, :example2
+  make_getter :example, :example2
 
 end
 

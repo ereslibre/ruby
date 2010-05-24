@@ -1,29 +1,25 @@
 #!/usr/bin/env ruby
 
 class MyClass
-
-  def initialize
-  end
-
 end
 
-myInstance = MyClass.new
+my_instance = MyClass.new
 
-myInstance.instance_eval do
+my_instance.instance_eval do
 
-  def myMethod
+  def my_method
     "Hello, myMethod on myInstance"
   end
 
 end
 
-puts myInstance.myMethod
+puts my_instance.my_method
 
-otherInstance = MyClass.new
+other_instance = MyClass.new
 
 begin
 
-  otherInstance.myMethod
+  other_instance.myMethod
 
   rescue Exception => msg
   puts "There is no such method in otherInstance ! (#{msg})"

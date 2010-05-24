@@ -39,31 +39,31 @@ end
 root = ARGV[0]
 destination = ARGV[1]
 
-rootDir = File.open(root, "r")
-fileList = Array.new
-Find.find(rootDir) do |path|
-  fileList << path if path =~ /(.+).xml$/
+root_dir = File.open(root, "r")
+file_list = Array.new
+Find.find(root_dir) do |path|
+  file_list << path if path =~ /(.+).xml$/
 end
-rootDir.close
+root_dir.close
 
 FileUtils.mkdir_p(destination)
 
-progress = ProgressBar.new("Generating", fileList.count * 3)
+progress = ProgressBar.new("Generating", file_list.count * 3)
 
-fileContents = Array.new
-for file in fileList
-  fileContents << XmlSimple.xml_in(file, { "KeyAttr" => "name" })
+file_contents = Array.new
+for file in file_list
+  file_contents << XmlSimple.xml_in(file, { "KeyAttr" => "name" })
   progress.inc
 end
 
-phpClasses = Array.new
-for contents in fileContents
-  phpClasses << PHPClass.new(destination, contents)
+php_classes = Array.new
+for contents in file_contents
+  php_classes << PHPClass.new(destination, contents)
   progress.inc
 end
 
-for phpClass in phpClasses
-  phpClass.writeClass(phpClasses)
+for php_class in php_classes
+  php_class.write_class(php_classes)
   progress.inc
 end
 

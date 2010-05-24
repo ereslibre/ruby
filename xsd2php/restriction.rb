@@ -19,21 +19,21 @@
 
 class Restriction
 
-  attr_reader :base, :minLength, :maxLength, :enumeration, :pattern, :minInclusive, :maxInclusive
+  attr_reader :base, :min_length, :max_length, :enumeration, :pattern, :min_inclusive, :max_inclusive
 
   def initialize(restriction)
     @base = restriction["base"]
     if @base == "token"
-      @minLength = restriction["minLength"][0]["value"] if restriction.has_key?("minLength")
-      @maxLength = restriction["maxLength"][0]["value"] if restriction.has_key?("maxLength")
+      @min_length = restriction["minLength"][0]["value"] if restriction.has_key?("minLength")
+      @max_length = restriction["maxLength"][0]["value"] if restriction.has_key?("maxLength")
       @length = restriction["length"][0]["value"] if restriction.has_key?("length")
       @pattern = restriction["pattern"][0]["value"] if restriction.has_key?("pattern")
     elsif @base == "unsignedShort"
-      @minInclusive = restriction["minInclusive"][0]["value"] if restriction.has_key?("minInclusive")
-      @maxInclusive = restriction["maxInclusive"][0]["value"] if restriction.has_key?("maxInclusive")
+      @min_inclusive = restriction["minInclusive"][0]["value"] if restriction.has_key?("minInclusive")
+      @max_inclusive = restriction["maxInclusive"][0]["value"] if restriction.has_key?("maxInclusive")
     elsif @base == "normalizedString"
-      @minLength = restriction["minLength"][0]["value"] if restriction.has_key?("minLength")
-      @maxLength = restriction["maxLength"][0]["value"] if restriction.has_key?("maxLength")      
+      @min_length = restriction["minLength"][0]["value"] if restriction.has_key?("minLength")
+      @max_length = restriction["maxLength"][0]["value"] if restriction.has_key?("maxLength")
     end
     if restriction.has_key?("enumeration")
       @enumeration = Array.new

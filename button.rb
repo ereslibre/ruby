@@ -6,19 +6,19 @@ class Button
 
   def initialize(name)
     @name = name
-    @onClick = nil
+    @on_click = nil
   end
 
-  def buttonClicked
-    if @onClick != nil
-      @onClick.call
+  def button_clicked
+    if @on_click != nil
+      @on_click.call
     else
       puts "No linked action"
     end
   end
 
-  def onClick(&block)
-    @onClick = block
+  def on_click(&block)
+    @on_click = block
   end
 
 end
@@ -32,8 +32,8 @@ def pause
 end
 
 button = Button.new("Play")
-button.buttonClicked
-button.onClick { play }
-button.buttonClicked
-button.onClick { pause }
-button.buttonClicked
+button.button_clicked
+button.on_click { play }
+button.button_clicked
+button.on_click { pause }
+button.button_clicked

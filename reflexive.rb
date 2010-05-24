@@ -6,7 +6,7 @@ class Test
     @name = name
   end
 
-  def sayHello
+  def say_hello
     if @name.respond_to?("capitalize")
       puts "Hello #{@name.capitalize}"
     else
@@ -14,7 +14,7 @@ class Test
     end
   end
 
-  def sayBye
+  def say_bye
     if @name.respond_to?("capitalize")
       puts "Bye #{@name.capitalize}"
     else
@@ -32,7 +32,7 @@ end
 
 class Test
 
-  def sayHelloAndBye
+  def say_hello_and_bye
     if @name.respond_to?("capitalize")
       puts "Hello and Bye, #{@name.capitalize}"
     else
@@ -43,8 +43,8 @@ class Test
 end
 
 t = Test.new
-t.sayHello
+t.say_hello
 t.name = "bar"
-t.sayBye
+t.say_bye
 t.name = "rofl"
-t.sayHelloAndBye
+t.say_hello_and_bye

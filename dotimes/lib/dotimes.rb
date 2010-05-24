@@ -20,10 +20,8 @@
 #
 # Takes a block of code and repeats it n times.
 #
-#	doTimes(5) { puts "Hello, world !!" }
+#	do_times(5) { puts "Hello, world !!" }
 #
-def doTimes(n, &block)
-	n.times do
-		block.call
-	end
+def do_times(n, &block)
+	n.times { block.call }
 end
