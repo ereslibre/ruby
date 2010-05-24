@@ -11,7 +11,7 @@ def fibUpTo(max)
 end
 
 def into(array)
-	return proc { |val| array << val }
+	return lambda { |val| array << val }
 end
 
 fibUpTo 50, &into(a = [])
