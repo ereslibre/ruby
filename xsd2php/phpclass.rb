@@ -68,12 +68,12 @@ class PHPClass
   def write_class(php_classes)
     return if @elements.empty?
     file = File.new("#{@destination}/#{@class_name.downcase}.php", "w")
-    write_to_file(file) { "<?php\n\n" }
+    wtf(file) { "<?php\n\n" }
     write_header(file)
-    write_to_file(file) { "class #{@class_name}\n{\n\tprivate $query = \"\";\n\n" }
+    wtf(file) { "class #{@class_name}\n{\n\tprivate $query = \"\";\n\n" }
     write_elements(file, php_classes)
     write_xml_generator(file)
-    write_to_file(file) { "}\n\n?>\n" }
+    wtf(file) { "}\n\n?>\n" }
     file.close
   end
 
@@ -93,41 +93,47 @@ class PHPClass
           end
         end
       } if type
-      write_to_file(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
-      write_to_file(file) { "\t\t$query += \"<#{element.name}>\";\n" }
-      write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
+      wtf(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
+      wtf(file) { "\t\t$query += \"<#{element.name}>\";\n" }
+      wtf(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
       if type && type.instance_variables.include?(:@attributes)
         for attribute in type.attributes
           emptyMinOccurs = (attribute.minOccurs == "0")
           if emptyMinOccurs
-            write_to_file(file) { "\t\tif ($#{attribute.name} != \"\") {\n" }
+            wtf(file) { "\t\tif ($#{attribute.name} != \"\") {\n" }
           end
-          write_to_file(file) { "#{"\t" if emptyMinOccurs}\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
-          write_to_file(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
+          wtf(file) { "#{"\t" if emptyMinOccurs}\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
+          wtf(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
           if emptyMinOccurs
-            write_to_file(file) { "\t\t}\n" }
+            wtf(file) { "\t\t}\n" }
           end
         end
       else
-        write_to_file(file) { "\t\t// Could not autogenerate. Please send a bug report.\n" }
+        wtf(file) { "\t\t// Could not autogenerate. Please send a bug report.\n" }
       end
-      write_to_file(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
-      write_to_file(file) { "\t\t$query += \"</#{element.name}>\";\n" }
-      write_to_file(file) { "\t}\n\n" }
+      wtf(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
+      wtf(file) { "\t\t$query += \"</#{element.name}>\";\n" }
+      wtf(file) { "\t}\n\n" }
     end
   end
 
   def write_xml_generator(file)
-    write_to_file(file) { "\tpublic function generateXML() {\n" }
-    write_to_file(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
-    write_to_file(file) { "\t\t$res += \"<epp xmlns=\\\"urn:ietf:params:xml:ns:epp-1.0\\\" " \
+    wtf(file) { "\tpublic function query() {\n" }
+    wtf(file) { "\t\treturn $query;\n" }
+    wtf(file) { "\t}\n\n" }
+    wtf(file) { "\tpublic function appendQuery($query) {\n" }
+    wtf(file) { "\t\t$this->query += $query;\n" }
+    wtf(file) { "\t}\n\n" }
+    wtf(file) { "\tpublic function generateXML() {\n" }
+    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
+    wtf(file) { "\t\t$res += \"<epp xmlns=\\\"urn:ietf:params:xml:ns:epp-1.0\\\" " \
       "xmlns:domain=\\\"urn:ietf:params:xml:ns:domain-1.0\\\" " \
       "xmlns:es_creds=\\\"urn:red.es:xml:ns:es_creds-1.0\\\">\";\n" }
-    write_to_file(file) { "\t\t$res += \"<command>\";\n" }
-    write_to_file(file) { "\t\t$res += $query;\n" }
-    write_to_file(file) { "\t\t$res += \"</command>\";\n" }
-    write_to_file(file) { "\t\treturn $res;\n" }
-    write_to_file(file) { "\t}\n" }
+    wtf(file) { "\t\t$res += \"<command>\";\n" }
+    wtf(file) { "\t\t$res += $query;\n" }
+    wtf(file) { "\t\t$res += \"</command>\";\n" }
+    wtf(file) { "\t\treturn $res;\n" }
+    wtf(file) { "\t}\n" }
   end
 
 end
