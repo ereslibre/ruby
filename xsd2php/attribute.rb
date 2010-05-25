@@ -19,14 +19,17 @@
 
 class Attribute
 
-  attr_reader :name, :type
+  attr_reader :name, :type, :minOccurs, :maxOccurs
 
-  def initialize(name, type)
+  def initialize(name, type, contents)
     @name = name
     @type = type
+    @minOccurs = contents["minOccurs"] if contents.has_key? "minOccurs"
+    @maxOccurs = contents["maxOccurs"] if contents.has_key? "maxOccurs"
   end
 
   def to_s
+    return "$#{@name} = \"\"" if @minOccurs == "0"
     "$#{@name}"
   end
 

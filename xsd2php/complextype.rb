@@ -30,7 +30,7 @@ class ComplexType
       if key == "sequence"
         sub_contents = value[0]["element"] # TODO: Check for "any" too
         for key, value in sub_contents
-          @attributes << Attribute.new(key, value["type"])
+          @attributes << Attribute.new(key, value["type"], value)
         end if sub_contents
       elsif key == "simpleContent"
       elsif key == "choice"

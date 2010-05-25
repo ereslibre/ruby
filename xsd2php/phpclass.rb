@@ -28,12 +28,12 @@ class PHPClass
 
   attr_reader :xsd_class_name, :class_name, :simple_types, :complex_types, :elements
 
-  @@global_simple_types = Hash.new
-  @@global_complex_types = Hash.new
+  @@simple_types = Hash.new
+  @@complex_types = Hash.new
 
   def type(type_name)
-    return @@global_complex_types[type_name] if @@global_complex_types.has_key?(type_name)
-    @@global_simple_types[type_name] if @@global_simple_types.has_key?(type_name)
+    return @@complex_types[type_name] if @@complex_types.has_key? type_name
+    @@simple_types[type_name] if @@simple_types.has_key? type_name
   end
 
   def initialize(destination, contents)
@@ -48,17 +48,18 @@ class PHPClass
         for curr_key, curr_value in value
           simple_type = SimpleType.new("#{@xsd_class_name}:#{curr_key}", curr_value["restriction"])
           @simple_types[curr_key] = simple_type
-          @@global_simple_types["#{@xsd_class_name}:#{curr_key}"] = simple_type
+          @@simple_types["#{@xsd_class_name}:#{curr_key}"] = simple_type
         end
       elsif key == "complexType"
         for curr_key, curr_value in value
           complex_type = ComplexType.new("#{@xsd_class_name}:#{curr_key}", curr_value)
           @complex_types[curr_key] = complex_type
-          @@global_complex_types["#{@xsd_class_name}:#{curr_key}"] = complex_type
+          @@complex_types["#{@xsd_class_name}:#{curr_key}"] = complex_type
         end
       elsif key == "element"
         for curr_key, curr_value in value
-          @elements << Element.new(curr_key, curr_value["type"], @xsd_class_name)
+          type = curr_value["type"]
+          @elements << Element.new(curr_key, type ? type : curr_value, @xsd_class_name)
         end
       end
     end
@@ -84,10 +85,21 @@ class PHPClass
       write_to_file(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.name}>\";\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
-      for attribute in type.attributes
-        write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
-        write_to_file(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
-      end if type
+      if type && type.instance_variables.include?(:@attributes)
+        for attribute in type.attributes
+          emptyMinOccurs = (attribute.minOccurs == "0")
+          if emptyMinOccurs
+            write_to_file(file) { "\t\tif ($#{attribute.name} != \"\") {\n" }
+          end
+          write_to_file(file) { "#{"\t" if emptyMinOccurs}\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
+          write_to_file(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
+          if emptyMinOccurs
+            write_to_file(file) { "\t\t}\n" }
+          end
+        end
+      else
+        write_to_file(file) { "\t\t// Could not autogenerate. Please send a bug report.\n" }
+      end
       write_to_file(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
       write_to_file(file) { "\t\t$query += \"</#{element.name}>\";\n" }
       write_to_file(file) { "\t}\n\n" }

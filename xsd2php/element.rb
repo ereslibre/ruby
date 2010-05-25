@@ -23,8 +23,14 @@ class Element
 
   def initialize(name, type, xsd_class_name)
     @name = name
-    @type = type
     @xsd_class_name = xsd_class_name
+    if type.is_a? String
+      @type = type
+    else
+      if type.has_key? "complexType" # TODO: Possibly check other types
+        @type = type["complexType"][0]["complexContent"][0]["extension"][0]["base"]
+      end
+    end
   end
 
 end
