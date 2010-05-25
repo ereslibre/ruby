@@ -82,6 +82,17 @@ class PHPClass
   def write_elements(file, php_classes)
     for element in @elements
       type = self.type(element.type)
+      type.attributes.sort! { | x, y |
+        if x.minOccurs == y.minOccurs
+          0
+        else
+          if x.minOccurs == "0"
+            1
+          else
+            -1
+          end
+        end
+      } if type
       write_to_file(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.name}>\";\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
