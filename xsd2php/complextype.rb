@@ -21,7 +21,7 @@ require "attribute"
 
 class ComplexType
 
-  attr_reader :name, :attributes
+  attr_reader :name, :attributes, :choices
 
   def initialize(name, contents)
     @name = name
@@ -34,6 +34,11 @@ class ComplexType
         end if sub_contents
       elsif key == "simpleContent"
       elsif key == "choice"
+        @choices = Array.new
+        sub_contents = value[0]["element"]
+        for key, value in sub_contents
+          @choices << Attribute.new(key, value["type"], value)
+        end
       elsif key == "attribute"
       elsif key == "mixed"
       elsif key == "anyAttribute"

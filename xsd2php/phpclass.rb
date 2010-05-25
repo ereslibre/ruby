@@ -93,9 +93,15 @@ class PHPClass
           end
         end
       } if type
+
+      for choice in type.choices
+        wtf(file) { "\tconst #{choice.name.upcase} = \"#{choice.name}\";\n" }
+      end if type && type.instance_variables.include?(:@choices)
+
       wtf(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       wtf(file) { "\t\t$query += \"<#{element.name}>\";\n" }
       wtf(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
+
       if type && type.instance_variables.include?(:@attributes)
         for attribute in type.attributes
           emptyMinOccurs = (attribute.minOccurs == "0")
