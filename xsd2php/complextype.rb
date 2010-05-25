@@ -21,7 +21,7 @@ require "attribute"
 
 class ComplexType
 
-  attr_reader :name, :sequence, :attributes
+  attr_reader :name, :attributes
 
   def initialize(name, contents)
     @name = name

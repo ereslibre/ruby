@@ -84,6 +84,10 @@ class PHPClass
       write_to_file(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.name}>\";\n" }
       write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
+      for attribute in type.attributes
+        write_to_file(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
+        write_to_file(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
+      end if type
       write_to_file(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
       write_to_file(file) { "\t\t$query += \"</#{element.name}>\";\n" }
       write_to_file(file) { "\t}\n\n" }
