@@ -80,66 +80,9 @@ class PHPClass
   private
 
   def write_elements(file, php_classes)
-    for element in @elements
-      type = self.type(element.type)
-      type.attributes.sort! { | x, y |
-        if x.minOccurs == y.minOccurs
-          0
-        else
-          if x.minOccurs == "0"
-            1
-          else
-            -1
-          end
-        end
-      } if type
-
-      for choice in type.choices
-        wtf(file) { "\tconst #{choice.name.upcase} = \"#{choice.name}\";\n" }
-      end if type && type.instance_variables.include?(:@choices)
-
-      wtf(file) { "\tpublic function do#{element.name.capitalize}(#{type.attributes.join(", ") if type}) {\n" }
-      wtf(file) { "\t\t$query += \"<#{element.name}>\";\n" }
-      wtf(file) { "\t\t$query += \"<#{element.xsd_class_name}:#{element.name}>\";\n" }
-
-      if type && type.instance_variables.include?(:@attributes)
-        for attribute in type.attributes
-          emptyMinOccurs = (attribute.minOccurs == "0")
-          if emptyMinOccurs
-            wtf(file) { "\t\tif ($#{attribute.name} != \"\") {\n" }
-          end
-          wtf(file) { "#{"\t" if emptyMinOccurs}\t\t$query += \"<#{element.xsd_class_name}:#{attribute.name}>" }
-          wtf(file) { "$#{attribute.name}</#{element.xsd_class_name}:#{attribute.name}>\";\n" }
-          if emptyMinOccurs
-            wtf(file) { "\t\t}\n" }
-          end
-        end
-      else
-        wtf(file) { "\t\t// Could not autogenerate. Please send a bug report.\n" }
-      end
-      wtf(file) { "\t\t$query += \"</#{element.xsd_class_name}:#{element.name}>\";\n" }
-      wtf(file) { "\t\t$query += \"</#{element.name}>\";\n" }
-      wtf(file) { "\t}\n\n" }
-    end
   end
 
   def write_xml_generator(file)
-    wtf(file) { "\tpublic function query() {\n" }
-    wtf(file) { "\t\treturn $query;\n" }
-    wtf(file) { "\t}\n\n" }
-    wtf(file) { "\tpublic function appendQuery($query) {\n" }
-    wtf(file) { "\t\t$this->query += $query;\n" }
-    wtf(file) { "\t}\n\n" }
-    wtf(file) { "\tpublic function generateXML() {\n" }
-    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
-    wtf(file) { "\t\t$res += \"<epp xmlns=\\\"urn:ietf:params:xml:ns:epp-1.0\\\" " \
-      "xmlns:domain=\\\"urn:ietf:params:xml:ns:domain-1.0\\\" " \
-      "xmlns:es_creds=\\\"urn:red.es:xml:ns:es_creds-1.0\\\">\";\n" }
-    wtf(file) { "\t\t$res += \"<command>\";\n" }
-    wtf(file) { "\t\t$res += $query;\n" }
-    wtf(file) { "\t\t$res += \"</command>\";\n" }
-    wtf(file) { "\t\treturn $res;\n" }
-    wtf(file) { "\t}\n" }
   end
 
 end
