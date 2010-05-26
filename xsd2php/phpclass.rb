@@ -84,7 +84,18 @@ class PHPClass
       type = self.type(element.type)
       arguments = Array.new
       if type.instance_variables.include? :@arguments
-        arguments.concat(type.arguments)
+        arguments = type.arguments
+        arguments.sort! { | x, y |
+          if x.minOccurs == y.minOccurs
+            0
+          else
+            if x.minOccurs == "0"
+              1
+            else
+              -1
+            end
+          end
+        }
       elsif type.instance_variables.include? :@choices
         for choice in type.choices
           wtf(file) { "\n\tconst #{choice.name.upcase} = \"#{choice.name}\";" }
