@@ -84,7 +84,7 @@ class PHPClass
       type = self.type(element.type)
       arguments = Array.new
       if type.instance_variables.include? :@arguments
-        arguments = type.arguments
+        arguments = resolve_arguments(type.arguments)
         arguments.sort! { | x, y |
           if x.minOccurs == y.minOccurs
             0
@@ -116,6 +116,25 @@ class PHPClass
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
     end
+  end
+
+  def resolve_arguments(arguments)
+    res = Array.new
+    for argument in arguments
+      type = self.type(argument.type)
+      if type.is_a? ComplexType
+        if !res.include? argument
+          args = Array.new
+          for arg in type.arguments
+            args << arg
+          end if type.arguments
+          res.concat(resolve_arguments(args))
+        end
+      else
+        res << argument
+      end
+    end
+    res
   end
 
   def write_xml_generator(file)
