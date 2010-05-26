@@ -38,7 +38,7 @@ class PHPClass
 
   def initialize(destination, contents)
     @destination = destination
-    @xsd_class_name = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3)
+    @xsd_class_name = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3) if contents["targetNamespace"]
     @class_name = @xsd_class_name.downcase.capitalize
     @simple_types = Hash.new
     @complex_types = Hash.new
