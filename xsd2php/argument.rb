@@ -17,13 +17,14 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-class Attribute
+class Argument
 
   attr_reader :name, :type, :minOccurs, :maxOccurs
 
   def initialize(name, type, contents)
     @name = name
     @type = type
+    return if !contents
     @minOccurs = contents["minOccurs"] if contents.has_key? "minOccurs"
     @maxOccurs = contents["maxOccurs"] if contents.has_key? "maxOccurs"
   end

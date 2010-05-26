@@ -17,27 +17,27 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-require "attribute"
+require "argument"
 
 class ComplexType
 
-  attr_reader :name, :attributes, :choices
+  attr_reader :name, :arguments, :choices
 
   def initialize(name, contents)
     @name = name
-    @attributes = Array.new
     for key, value in contents
       if key == "sequence"
+        @arguments = Array.new
         sub_contents = value[0]["element"] # TODO: Check for "any" too
         for key, value in sub_contents
-          @attributes << Attribute.new(key, value["type"], value)
+          @arguments << Argument.new(key, value["type"], value)
         end if sub_contents
       elsif key == "simpleContent"
       elsif key == "choice"
         @choices = Array.new
         sub_contents = value[0]["element"]
         for key, value in sub_contents
-          @choices << Attribute.new(key, value["type"], value)
+          @choices << Argument.new(key, value["type"], value)
         end
       elsif key == "attribute"
       elsif key == "mixed"

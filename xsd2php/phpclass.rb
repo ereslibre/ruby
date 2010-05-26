@@ -70,7 +70,7 @@ class PHPClass
     file = File.new("#{@destination}/#{@class_name.downcase}.php", "w")
     wtf(file) { "<?php\n\n" }
     write_header(file)
-    wtf(file) { "class #{@class_name}\n{\n\tprivate $query = \"\";\n\n" }
+    wtf(file) { "class #{@class_name}\n{" }
     write_elements(file, php_classes)
     write_xml_generator(file)
     wtf(file) { "}\n\n?>\n" }
@@ -80,6 +80,31 @@ class PHPClass
   private
 
   def write_elements(file, php_classes)
+    for element in @elements
+      type = self.type(element.type)
+      arguments = Array.new
+      if type.instance_variables.include? :@arguments
+        arguments.concat(type.arguments)
+      elsif type.instance_variables.include? :@choices
+        for choice in type.choices
+          wtf(file) { "\n\tconst #{choice.name.upcase} = \"#{choice.name}\";" }
+        end
+        arguments << Argument.new("choice", nil, nil)
+      else
+      end
+      wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = \"\", $_namespace = true) {\n" }
+      wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@xsd_class_name}:\" : \"\";\n" }
+      wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
+
+      for argument in arguments
+        wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" } if argument.type
+      end
+
+      wtf(file) { "\t\t$res += $_inject;\n" }
+      wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\treturn $res;\n" }
+      wtf(file) { "\t}\n" }
+    end
   end
 
   def write_xml_generator(file)
