@@ -24,6 +24,20 @@ require "simpletype"
 require "complextype"
 require "restriction"
 
+# Reopen Argument class, and add information that only targets PHP classes. This way we easily allow
+# to create backends for other languages.
+class Argument
+
+  def to_s
+    if @type
+      "$#{@name} /* #{@type} */"
+    else
+      "$#{@name}"
+    end
+  end
+
+end
+
 class PHPClass
 
   attr_reader :xsd_class_name, :namespace, :referer, :simple_types, :complex_types, :elements
@@ -77,12 +91,8 @@ class PHPClass
     wtf(file) { "<?php\n\n" }
     write_header(file, @namespace)
     wtf(file) { "class #{@xsd_class_name}\n{\n" }
-    wtf(file) { "\tconst XML_NAMESPACE = \"#{@namespace}\";\n" }
-    wtf(file) { "\tconst XML_REFERER = \"#{@referer}\";\n" }
-    wtf(file) { "\n\tprivate $_query = \"\";\n" }
     write_elements(file, php_classes)
-    write_xml_generator(file)
-    wtf(file) { "}\n\n?>\n" }
+    wtf(file) { "\n}\n\n?>\n" }
     file.close
   end
 
@@ -90,90 +100,18 @@ class PHPClass
 
   def write_elements(file, php_classes)
     for element in @elements
-      type = self.type(element.type)
-      arguments = Array.new
-      if type.instance_variables.include? :@arguments
-        arguments = resolve_arguments(type.arguments)
-        arguments.sort! { | x, y |
-          if x.minOccurs == y.minOccurs
-            0
-          else
-            if x.minOccurs == "0"
-              1
-            else
-              -1
-            end
-          end
-        }
-      elsif type.instance_variables.include? :@choices
-        for choice in type.choices
-          wtf(file) { "\n\tconst #{choice.name.upcase} = \"#{choice.name}\";" }
-        end
-        arguments << Argument.new("choice", nil, nil)
-      else
-      end
-
-      if @namespace
-        wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = null, $_namespace = true) {\n" }
-        wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-        wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
-      else
-        wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = null) {\n" }
-        wtf(file) { "\t\t$res = \"<#{element.name}>\";\n" }
-      end
-
-      for argument in arguments
-        if @namespace
-            wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" } if argument.type
-        else
-            wtf(file) { "\t\t$res += \"<#{argument.name}>$#{argument.name}</#{argument.name}>\";\n" } if argument.type
-        end
-      end
-
-      wtf(file) { "\t\tif ($_inject) {\n" }
-      wtf(file) { "\t\t\t$res += $_inject->query();\n" }
-      wtf(file) { "\t\t}\n" }
-
-      if @namespace
-        wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
-      else
-          wtf(file) { "\t\t$res += \"</#{element.name}>\";\n" }
-      end
-      wtf(file) { "\t\t$_query = $res;\n" }
+      wtf(file) { "\n\tpublic function do_#{element.name}($#{element.type.slice(/(\w*):(\w*)/, 2)}) {\n" }
       wtf(file) { "\t}\n" }
     end
-  end
-
-  def resolve_arguments(arguments)
-    res = Array.new
-    for argument in arguments
-      type = self.type(argument.type)
-      if type.is_a? ComplexType
-        if !res.include? argument
-          args = Array.new
-          for arg in type.arguments
-            args << arg
-          end if type.arguments
-          res.concat(resolve_arguments(args))
-        end
-      else
-        res << argument
-      end
+    for complex_type_key, complex_type in @complex_types
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ") if complex_type.arguments}) {\n" }
+      wtf(file) { "\t\t$res = \"\";\n" }
+      for argument in complex_type.arguments
+        wtf(file) { "\t\t$res += \"<#{@namespace}:#{argument.name}>$#{argument.name}</#{@namespace}:#{argument.name}>\";\n" }
+      end if complex_type.arguments
+      wtf(file) { "\t\treturn $res;\n" }
+      wtf(file) { "\t}\n" }
     end
-    res
-  end
-
-  def write_xml_generator(file)
-    wtf(file) { "\n\tpublic function generateXML($_inject = null) {\n" }
-    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
-    wtf(file) { "\t\tif ($_inject) {\n" }
-    wtf(file) { "\t\t\t$res += $_inject->query();\n" }
-    wtf(file) { "\t\t}\n" }
-    wtf(file) { "\t\treturn $res;\n" }
-    wtf(file) { "\t}\n" }
-    wtf(file) { "\n\tpublic function query() {\n" }
-    wtf(file) { "\t\treturn $_query;\n" }
-    wtf(file) { "\t}\n" }
   end
 
 end

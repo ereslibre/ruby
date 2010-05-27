@@ -29,9 +29,4 @@ class Argument
     @maxOccurs = contents["maxOccurs"] if contents.has_key? "maxOccurs"
   end
 
-  def to_s
-    return "$#{@name} = null" if @minOccurs == "0"
-    "$#{@name}"
-  end
-
 end
