@@ -112,8 +112,8 @@ class PHPClass
       wtf(file) { "\n\tpublic function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
       wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
       wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
-      wtf(file) { "\t\t$res += $#{element.name};\n" }
-      wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\t$res .= $#{element.name};\n" }
+      wtf(file) { "\t\t$res .= \"</${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
     end
@@ -146,7 +146,7 @@ class PHPClass
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$res = \"\";\n" }
     for argument in complex_type.arguments
-      wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t$res .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
     end
     wtf(file) { "\t\treturn $res;\n" }
   end
@@ -164,9 +164,9 @@ class PHPClass
     wtf(file) { "\tpublic function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$res = \"\";\n" }
-    wtf(file) { "\t\t$res += \"<$__namespace$_choice>\";\n" }
-    wtf(file) { "\t\t$res += $_inject;\n" }
-    wtf(file) { "\t\t$res += \"</$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\t$res .= \"<$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\t$res .= $_inject;\n" }
+    wtf(file) { "\t\t$res .= \"</$__namespace$_choice>\";\n" }
     wtf(file) { "\t\treturn $res;\n" }
   end
 
