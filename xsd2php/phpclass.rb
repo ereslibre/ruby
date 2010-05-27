@@ -109,11 +109,10 @@ class PHPClass
 
   def write_elements(file, php_classes)
     for element in @elements
-      input = "$#{element.type.slice(/(\w*):(\w*)/, 2)}"
-      wtf(file) { "\n\tpublic function do_#{element.name}(#{input}, $_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
       wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
       wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
-      wtf(file) { "\t\t$res += #{input}\n" }
+      wtf(file) { "\t\t$res += $#{element.name};\n" }
       wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
@@ -155,7 +154,7 @@ class PHPClass
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
     wtf(file) { "\n" }
     for choice in complex_type.choices
-      wtf(file) { "\tconst #{choice.name.upcase} = \"#{choice.name}\";" }
+      wtf(file) { "\tconst #{complex_type_key}_#{choice.name.upcase} = \"#{choice.name}\";" }
       if choice.type
         wtf(file) { " /* Expects at $_inject: #{choice.type} */\n" }
       else
@@ -165,9 +164,10 @@ class PHPClass
     wtf(file) { "\tpublic function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$res = \"\";\n" }
-    wtf(file) { "\t\t$res += \"<${__namespace}$_choice>\";\n" }
+    wtf(file) { "\t\t$res += \"<$__namespace$_choice>\";\n" }
     wtf(file) { "\t\t$res += $_inject;\n" }
-    wtf(file) { "\t\t$res += \"</${__namespace}$_choice>\";\n" }
+    wtf(file) { "\t\t$res += \"</$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\treturn $res;\n" }
   end
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
