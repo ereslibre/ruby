@@ -41,8 +41,8 @@ end
 class Attribute
 
   def to_s
-    return "$#{@name}" if !@default
-    "$#{@name} = \"#{@default}\""
+    return "$#{@name} /* #{@type} */" if !@default
+    "$#{@name} = \"#{@default}\" /* #{@type} */"
   end
 
 end
@@ -124,6 +124,8 @@ class PHPClass
         write_complex_type_with_choices file, complex_type_key, complex_type
       elsif complex_type.simple_content
         write_complex_type_with_simple_content file, complex_type_key, complex_type
+      elsif complex_type.attributes
+        write_complex_type_with_attributes file, complex_type_key, complex_type
       else
         puts "!!! Unknown complex type information (#{complex_type_key})"
       end
@@ -151,6 +153,11 @@ class PHPClass
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
     wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}) {\n" }
+    wtf(file) { "\t}\n" }
+  end
+
+  def write_complex_type_with_attributes(file, complex_type_key, complex_type)
+    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}) {\n" }
     wtf(file) { "\t}\n" }
   end
 

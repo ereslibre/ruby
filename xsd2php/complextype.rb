@@ -34,18 +34,18 @@ class Attribute
 
   attr_reader :name, :type, :use, :default
 
-  def initialize(contents)
-    @name = contents[0]
-    @type = contents[1]["type"]
-    @use = contents[1]["use"]
-    @default = contents[1]["default"]
+  def initialize(name, type, use, default)
+    @name = name
+    @type = type
+    @use = use
+    @default = default
   end
 
 end
 
 class ComplexType
 
-  attr_reader :name, :arguments, :choices, :simple_content
+  attr_reader :name, :arguments, :choices, :simple_content, :attributes
 
   def initialize(name, contents)
     @name = name
@@ -60,7 +60,8 @@ class ComplexType
         base = value[0]["extension"][0]["base"]
         attributes = Array.new
         for attribute in value[0]["extension"][0]["attribute"]
-          attributes << Attribute.new(attribute)
+          attributes << Attribute.new(attribute[0], attribute[1]["type"], attribute[1]["use"],
+                                      attribute[1]["default"])
         end
         @simple_content = SimpleContent.new(base, attributes)
       elsif key == "choice"
@@ -70,6 +71,10 @@ class ComplexType
           @choices << Argument.new(key, value["type"], value)
         end
       elsif key == "attribute"
+        @attributes = Array.new
+        for key, value in value
+          @attributes << Attribute.new(key, value["type"], value["use"], value["required"])
+        end
       elsif key == "mixed"
       elsif key == "anyAttribute"
       end
