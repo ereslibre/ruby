@@ -110,14 +110,16 @@ class PHPClass
   def write_elements(file, php_classes)
     for element in @elements
       input = "$#{element.type.slice(/(\w*):(\w*)/, 2)}"
-      wtf(file) { "\n\tpublic function do_#{element.name}(#{input}) {\n" }
-      wtf(file) { "\t\t$res = \"<#{@namespace}:#{element.name}>\";\n" }
+      wtf(file) { "\n\tpublic function do_#{element.name}(#{input}, $_namespace = true) {\n" }
+      wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
+      wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\t$res += #{input}\n" }
-      wtf(file) { "\t\t$res += \"</#{@namespace}:#{element.name}>\";\n" }
+      wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
     end
     for complex_type_key, complex_type in @complex_types
+      correct = true
       if complex_type.arguments
         write_complex_type_with_arguments file, complex_type_key, complex_type
       elsif complex_type.choices
@@ -127,19 +129,27 @@ class PHPClass
       elsif complex_type.attributes
         write_complex_type_with_attributes file, complex_type_key, complex_type
       else
+        correct = false
         puts "!!! Unknown complex type information (#{complex_type_key})"
+      end
+      if correct
+        wtf(file) { "\t}\n" }
       end
     end
   end
 
   def write_complex_type_with_arguments(file, complex_type_key, complex_type)
-    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ")}) {\n" }
+    if complex_type.arguments.empty?
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+    else
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ")}, $_namespace = true) {\n" }
+    end
+    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$res = \"\";\n" }
     for argument in complex_type.arguments
-      wtf(file) { "\t\t$res += \"<#{@namespace}:#{argument.name}>$#{argument.name}</#{@namespace}:#{argument.name}>\";\n" }
+      wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
     end
     wtf(file) { "\t\treturn $res;\n" }
-    wtf(file) { "\t}\n" }
   end
 
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
@@ -147,18 +157,26 @@ class PHPClass
     for choice in complex_type.choices
       wtf(file) { "\tconst #{choice.name.upcase} = \"#{choice.name}\";\n" }
     end
-    wtf(file) { "\tpublic function create_#{complex_type_key}($choice) {\n" }
-    wtf(file) { "\t}\n" }
+    wtf(file) { "\tpublic function create_#{complex_type_key}($choice, $_namespace = true) {\n" }
+    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
   end
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
-    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}) {\n" }
-    wtf(file) { "\t}\n" }
+    if complex_type.simple_content.attributes.empty?
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+    else
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}, $_namespace = true) {\n" }
+    end
+    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
   end
 
   def write_complex_type_with_attributes(file, complex_type_key, complex_type)
-    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}) {\n" }
-    wtf(file) { "\t}\n" }
+    if complex_type.attributes.empty?
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+    else
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}, $_namespace = true) {\n" }
+    end
+    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
   end
 
 end
