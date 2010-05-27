@@ -56,10 +56,12 @@ for file in file_list
   progress.inc
 end
 
+i = 0
 php_classes = Array.new
 for contents in file_contents
-  php_classes << PHPClass.new(destination, contents)
+  php_classes << PHPClass.new(destination, contents, file_list[i])
   progress.inc
+  i += 1
 end
 
 for php_class in php_classes

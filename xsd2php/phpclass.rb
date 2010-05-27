@@ -26,7 +26,7 @@ require "restriction"
 
 class PHPClass
 
-  attr_reader :xsd_class_name, :class_name, :simple_types, :complex_types, :elements
+  attr_reader :xsd_class_name, :namespace, :simple_types, :complex_types, :elements
 
   @@simple_types = Hash.new
   @@complex_types = Hash.new
@@ -36,10 +36,15 @@ class PHPClass
     @@simple_types[type_name] if @@simple_types.has_key? type_name
   end
 
-  def initialize(destination, contents)
+  def initialize(destination, contents, file_name)
     @destination = destination
-    @xsd_class_name = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3)
-    @class_name = @xsd_class_name.downcase.capitalize
+    extension = file_name.slice(/\.(\w+)$/)
+    @xsd_class_name = File.basename(file_name, extension).slice(/(\w*)/)
+    if contents["targetNamespace"]
+        @namespace = contents["targetNamespace"].slice(/^((.*):)*(\w*)/, 3)
+    else
+        @namespace = nil
+    end
     @simple_types = Hash.new
     @complex_types = Hash.new
     @elements = Array.new
@@ -67,10 +72,10 @@ class PHPClass
 
   def write_class(php_classes)
     return if @elements.empty?
-    file = File.new("#{@destination}/#{@class_name.downcase}.php", "w")
+    file = File.new("#{@destination}/#{@xsd_class_name}.php", "w")
     wtf(file) { "<?php\n\n" }
-    write_header(file)
-    wtf(file) { "class #{@class_name}\n{" }
+    write_header(file, @namespace)
+    wtf(file) { "class #{@xsd_class_name}\n{" }
     write_elements(file, php_classes)
     write_xml_generator(file)
     wtf(file) { "}\n\n?>\n" }
@@ -103,16 +108,30 @@ class PHPClass
         arguments << Argument.new("choice", nil, nil)
       else
       end
-      wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = \"\", $_namespace = true) {\n" }
-      wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@xsd_class_name}:\" : \"\";\n" }
-      wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
+
+      if @namespace
+        wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = \"\", $_namespace = true) {\n" }
+        wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
+        wtf(file) { "\t\t$res = \"<${__namespace}#{element.name}>\";\n" }
+      else
+        wtf(file) { "\n\tpublic function do_#{element.name}(#{arguments.join(", ") + ", " if !arguments.empty?}$_inject = \"\") {\n" }
+        wtf(file) { "\t\t$res = \"<#{element.name}>\";\n" }
+      end
 
       for argument in arguments
-        wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" } if argument.type
+        if @namespace
+            wtf(file) { "\t\t$res += \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" } if argument.type
+        else
+            wtf(file) { "\t\t$res += \"<#{argument.name}>$#{argument.name}</#{argument.name}>\";\n" } if argument.type
+        end
       end
 
       wtf(file) { "\t\t$res += $_inject;\n" }
-      wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
+      if @namespace
+        wtf(file) { "\t\t$res += \"</${__namespace}#{element.name}>\";\n" }
+      else
+          wtf(file) { "\t\t$res += \"</#{element.name}>\";\n" }
+      end
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
     end
