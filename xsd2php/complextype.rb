@@ -19,9 +19,33 @@
 
 require "argument"
 
+class SimpleContent
+
+  attr_reader :base, :attributes
+
+  def initialize(base, attributes)
+    @base = base
+    @attributes = attributes
+  end
+
+end
+
+class Attribute
+
+  attr_reader :name, :type, :use, :default
+
+  def initialize(contents)
+    @name = contents[0]
+    @type = contents[1]["type"]
+    @use = contents[1]["use"]
+    @default = contents[1]["default"]
+  end
+
+end
+
 class ComplexType
 
-  attr_reader :name, :arguments, :choices
+  attr_reader :name, :arguments, :choices, :simple_content
 
   def initialize(name, contents)
     @name = name
@@ -33,6 +57,12 @@ class ComplexType
           @arguments << Argument.new(key, value["type"], value)
         end if sub_contents
       elsif key == "simpleContent"
+        base = value[0]["extension"][0]["base"]
+        attributes = Array.new
+        for attribute in value[0]["extension"][0]["attribute"]
+          attributes << Attribute.new(attribute)
+        end
+        @simple_content = SimpleContent.new(base, attributes)
       elsif key == "choice"
         @choices = Array.new
         sub_contents = value[0]["element"]

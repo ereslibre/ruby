@@ -38,6 +38,15 @@ class Argument
 
 end
 
+class Attribute
+
+  def to_s
+    return "$#{@name}" if !@default
+    "$#{@name} = \"#{@default}\""
+  end
+
+end
+
 class PHPClass
 
   attr_reader :xsd_class_name, :namespace, :referer, :simple_types, :complex_types, :elements
@@ -100,18 +109,49 @@ class PHPClass
 
   def write_elements(file, php_classes)
     for element in @elements
-      wtf(file) { "\n\tpublic function do_#{element.name}($#{element.type.slice(/(\w*):(\w*)/, 2)}) {\n" }
-      wtf(file) { "\t}\n" }
-    end
-    for complex_type_key, complex_type in @complex_types
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ") if complex_type.arguments}) {\n" }
-      wtf(file) { "\t\t$res = \"\";\n" }
-      for argument in complex_type.arguments
-        wtf(file) { "\t\t$res += \"<#{@namespace}:#{argument.name}>$#{argument.name}</#{@namespace}:#{argument.name}>\";\n" }
-      end if complex_type.arguments
+      input = "$#{element.type.slice(/(\w*):(\w*)/, 2)}"
+      wtf(file) { "\n\tpublic function do_#{element.name}(#{input}) {\n" }
+      wtf(file) { "\t\t$res = \"<#{@namespace}:#{element.name}>\";\n" }
+      wtf(file) { "\t\t$res += #{input}\n" }
+      wtf(file) { "\t\t$res += \"</#{@namespace}:#{element.name}>\";\n" }
       wtf(file) { "\t\treturn $res;\n" }
       wtf(file) { "\t}\n" }
     end
+    for complex_type_key, complex_type in @complex_types
+      if complex_type.arguments
+        write_complex_type_with_arguments file, complex_type_key, complex_type
+      elsif complex_type.choices
+        write_complex_type_with_choices file, complex_type_key, complex_type
+      elsif complex_type.simple_content
+        write_complex_type_with_simple_content file, complex_type_key, complex_type
+      else
+        puts "!!! Unknown complex type information (#{complex_type_key})"
+      end
+    end
+  end
+
+  def write_complex_type_with_arguments(file, complex_type_key, complex_type)
+    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ")}) {\n" }
+    wtf(file) { "\t\t$res = \"\";\n" }
+    for argument in complex_type.arguments
+      wtf(file) { "\t\t$res += \"<#{@namespace}:#{argument.name}>$#{argument.name}</#{@namespace}:#{argument.name}>\";\n" }
+    end
+    wtf(file) { "\t\treturn $res;\n" }
+    wtf(file) { "\t}\n" }
+  end
+
+  def write_complex_type_with_choices(file, complex_type_key, complex_type)
+    wtf(file) { "\n" }
+    for choice in complex_type.choices
+      wtf(file) { "\tconst #{choice.name.upcase} = \"#{choice.name}\";\n" }
+    end
+    wtf(file) { "\tpublic function create_#{complex_type_key}($choice) {\n" }
+    wtf(file) { "\t}\n" }
+  end
+
+  def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
+    wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}) {\n" }
+    wtf(file) { "\t}\n" }
   end
 
 end
