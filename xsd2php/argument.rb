@@ -30,7 +30,7 @@ class Argument
   end
 
   def to_s
-    return "$#{@name} = \"\"" if @minOccurs == "0"
+    return "$#{@name} = null" if @minOccurs == "0"
     "$#{@name}"
   end
 
