@@ -51,5 +51,24 @@ def write_header(file)
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+  * Note that $_inject and $_namespace arguments have been automatically
+  * added to the PHP class by xsd2php, and are not related to the information
+  * you have provided through your XSD schemas.
+  *
+  * $_inject parameter allows you to provide random extended information to any
+  * call, so it allows you to generate very versatile code.
+  *
+  * $_namespace parameter tells whether the namespace information should be added
+  * or not. For instance, say your namespace is \"foo\", and your tag is \"bar\". A
+  * generation without namespace would be something like:
+  *
+  * <bar>Information goes here</bar>
+  *
+  * While when being generated namespace aware, you would have got:
+  *
+  * <foo:bar>Information goes here</foo:bar>
+  */
+
 """ }
 end
