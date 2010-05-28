@@ -114,8 +114,14 @@ class PHPClass
     for element in @elements
       wtf(file) { "\n\tpublic function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
       wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
+      wtf(file) { "\t\t$this->_dependencies = $#{element.name}->dependencies();\n" }
+      wtf(file) { "\t\t$this->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t$this->_query = \"<${__namespace}#{element.name}>\";\n" }
-      wtf(file) { "\t\t$this->_query .= $#{element.name};\n" }
+      wtf(file) { "\t\tif (is_string($#{element.name})) {\n" }
+      wtf(file) { "\t\t\t$this->_query .= $#{element.name};\n" }
+      wtf(file) { "\t\t} else {\n" }
+      wtf(file) { "\t\t\t$this->_query .= $#{element.name}->query();\n" }
+      wtf(file) { "\t\t}\n" }
       wtf(file) { "\t\t$this->_query .= \"</${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t}\n" }
     end
@@ -149,7 +155,7 @@ class PHPClass
         if choice.type
           wtf(file) { " /* Expects at $_inject: #{choice.type} */" }
         else
-          wtf(file) { " /* Nothing expected at $_inject. Provide null */" }
+          wtf(file) { " /* Nothing expected at $_inject. Please, provide null */" }
         end
       end if complex_type.choices
       totalArguments = Array.new
@@ -167,11 +173,21 @@ class PHPClass
       wtf(file) { "\t\tif ($_inject) {\n" }
       wtf(file) { "\t\t\t$this->_dependencies = $_inject->dependencies();\n" }
       wtf(file) { "\t\t\t$this->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
-      wtf(file) { "\t\t\t$this->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
+      wtf(file) { "\t\t\t\t$this->_query .= $_inject;\n" }
+      wtf(file) { "\t\t\t} else {\n" }
+      wtf(file) { "\t\t\t\t$this->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\t\t$this->_dependencies = array_merge($this->_dependencies, $_inject->dependencies());\n" }
+      wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
     end
     for argument in complex_type.arguments
-      wtf(file) { "\t\t$this->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
+      wtf(file) { "\t\t\t$this->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t} else {\n" }
+      wtf(file) { "\t\t\t$this->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$this->_dependencies = array_merge($this->_dependencies, $#{argument.name}->dependencies());\n" }
+      wtf(file) { "\t\t}\n" }
     end
     if complex_type.choices
       wtf(file) { "\t\t$this->_query .= \"</$__namespace$_choice>\";\n" }
@@ -185,15 +201,18 @@ class PHPClass
       if choice.type
         wtf(file) { " /* Expects at $_inject: #{choice.type} */\n" }
       else
-        wtf(file) { " /* Nothing expected at $_inject. Provide the null */\n" }
+        wtf(file) { " /* Nothing expected at $_inject. Please, provide null */\n" }
       end
     end
     wtf(file) { "\tpublic function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$this->_query = \"\";\n" }
     wtf(file) { "\t\t$this->_query .= \"<$__namespace$_choice>\";\n" }
-    wtf(file) { "\t\tif ($_inject) {\n" }
+    wtf(file) { "\t\tif ($_inject && is_string($_inject)) {\n" }
+    wtf(file) { "\t\t\t$this->_query .= $_inject;\n" }
+    wtf(file) { "\t\t} else if ($_inject) {\n" }
     wtf(file) { "\t\t\t$this->_query .= $_inject->query();\n" }
+    wtf(file) { "\t\t\t$this->_dependencies = array_merge($this->_dependencies, $_inject->dependencies());\n" }
     wtf(file) { "\t\t}\n" }
     wtf(file) { "\t\t$this->_query .= \"</$__namespace$_choice>\";\n" }
   end
