@@ -182,6 +182,7 @@ class PHPClass
       wtf(file) { "\t\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
+      wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
@@ -190,9 +191,6 @@ class PHPClass
       wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $#{argument.name}->dependencies());\n" }
       wtf(file) { "\t\t}\n" }
-    end
-    if complex_type.choices
-      wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
     end
     wtf(file) { "\t\treturn $_res;\n" }
   end
