@@ -237,7 +237,17 @@ class PHPClass
     wtf(file) { "\t\t$dependencies = array_unique($this->_dependencies);\n" }
     wtf(file) { "\t\t$dependencyList = implode(\" \", $dependencies);\n" }
     wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"?>\";\n" }
-    wtf(file) { "\t\t$res .= \"<${__namespace}#{@xsd_class_name} $dependencyList>\";\n" }
+    wtf(file) { "\t\t$myself = \"\";\n" }
+    wtf(file) { "\t\tif ($_namespace) {\n" }
+    wtf(file) { "\t\t\t$myself = \"xmlns:#{@namespace}=\\\"#{@referer}\\\"\";\n" }
+    wtf(file) { "\t\t} else {\n" }
+    wtf(file) { "\t\t\t$myself = \"xmlns=\\\"#{@referer}\\\"\";\n" }
+    wtf(file) { "\t\t}\n" }
+    wtf(file) { "\t\tif (empty($dependencyList)) {\n" }
+    wtf(file) { "\t\t\t$res .= \"<${__namespace}#{@xsd_class_name} $myself>\";\n" }
+    wtf(file) { "\t\t} else {\n" }
+    wtf(file) { "\t\t\t$res .= \"<${__namespace}#{@xsd_class_name} $myself $dependencyList>\";\n" }
+    wtf(file) { "\t\t}\n" }
     wtf(file) { "\t\tif ($_inject) {\n" }
     wtf(file) { "\t\t\t$res .= $_inject->query();\n" }
     wtf(file) { "\t\t}\n" }
