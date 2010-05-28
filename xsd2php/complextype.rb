@@ -52,10 +52,30 @@ class ComplexType
     for key, value in contents
       if key == "sequence"
         @arguments = Array.new
-        sub_contents = value[0]["element"] # TODO: Check for "any" too
+        sub_contents = value[0]
         for key, value in sub_contents
-          @arguments << Argument.new(key, value["type"], value)
-        end if sub_contents
+          case key
+            when "element"
+              for key, value in value
+                @arguments << Argument.new(key, value["type"], value)
+              end
+            when "sequence"
+              sub_contents = value[0]["element"]
+              for key, value in sub_contents
+                @arguments << Argument.new(key, value["type"], value)
+              end
+            when "choice"
+              @choices = Array.new
+              sub_contents = value[0]["element"]
+              for key, value in sub_contents
+                @choices << Argument.new(key, value["type"], value)
+              end
+            when "any"
+              @arguments << Argument.new("any", nil, nil)
+            else
+              puts "!!! Unknown data structure when parsing XSD"
+          end
+        end
       elsif key == "simpleContent"
         base = value[0]["extension"][0]["base"]
         attributes = Array.new

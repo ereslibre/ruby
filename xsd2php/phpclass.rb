@@ -138,15 +138,37 @@ class PHPClass
   end
 
   def write_complex_type_with_arguments(file, complex_type_key, complex_type)
-    if complex_type.arguments.empty?
+    if complex_type.arguments.empty? && complex_type.choices.empty?
       wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
     else
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.arguments.join(", ")}, $_namespace = true) {\n" }
+
+      for choice in complex_type.choices
+        wtf(file) { "\n\tconst #{complex_type_key}_#{choice.name.upcase} = \"#{choice.name}\";" }
+        if choice.type
+          wtf(file) { " /* Expects at $_inject: #{choice.type} */" }
+        else
+          wtf(file) { " /* Nothing expected at $_inject. Provide the empty string */" }
+        end
+      end if complex_type.choices
+      totalArguments = Array.new
+      if complex_type.choices
+        totalArguments << Argument.new("_choice", nil, nil)
+        totalArguments << Argument.new("_inject", nil, nil)
+      end
+      totalArguments << complex_type.arguments
+      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{totalArguments.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$res = \"\";\n" }
+    if complex_type.choices
+      wtf(file) { "\t\t$res .= \"<$__namespace$_choice>\";\n" }
+      wtf(file) { "\t\t$res .= $_inject;\n" }
+    end
     for argument in complex_type.arguments
       wtf(file) { "\t\t$res .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+    end
+    if complex_type.choices
+      wtf(file) { "\t\t$res .= \"</$__namespace$_choice>\";\n" }
     end
     wtf(file) { "\t\treturn $res;\n" }
   end
