@@ -112,17 +112,19 @@ class PHPClass
 
   def write_elements(file, php_classes)
     for element in @elements
-      wtf(file) { "\n\tpublic function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
       wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-      wtf(file) { "\t\t$this->_dependencies = $#{element.name}->dependencies();\n" }
-      wtf(file) { "\t\t$this->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
-      wtf(file) { "\t\t$this->_query = \"<${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
+      wtf(file) { "\t\t$_res->_dependencies = $#{element.name}->dependencies();\n" }
+      wtf(file) { "\t\t$_res->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t$_res->_query = \"<${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\tif (is_string($#{element.name})) {\n" }
-      wtf(file) { "\t\t\t$this->_query .= $#{element.name};\n" }
+      wtf(file) { "\t\t\t$_res->_query .= $#{element.name};\n" }
       wtf(file) { "\t\t} else {\n" }
-      wtf(file) { "\t\t\t$this->_query .= $#{element.name}->query();\n" }
+      wtf(file) { "\t\t\t$_res->_query .= $#{element.name}->query();\n" }
       wtf(file) { "\t\t}\n" }
-      wtf(file) { "\t\t$this->_query .= \"</${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\t$_res->_query .= \"</${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\treturn $_res;\n" }
       wtf(file) { "\t}\n" }
     end
     for complex_type_key, complex_type in @complex_types
@@ -147,7 +149,7 @@ class PHPClass
 
   def write_complex_type_with_arguments(file, complex_type_key, complex_type)
     if complex_type.arguments.empty? && complex_type.choices.empty?
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
     else
 
       for choice in complex_type.choices
@@ -164,34 +166,35 @@ class PHPClass
         totalArguments << Argument.new("_inject", nil, nil)
       end
       totalArguments << complex_type.arguments
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{totalArguments.join(", ")}, $_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{totalArguments.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    wtf(file) { "\t\t$this->_query = \"\";\n" }
+    wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
     if complex_type.choices
-      wtf(file) { "\t\t$this->_query .= \"<$__namespace$_choice>\";\n" }
+      wtf(file) { "\t\t$_res->_query .= \"<$__namespace$_choice>\";\n" }
       wtf(file) { "\t\tif ($_inject) {\n" }
-      wtf(file) { "\t\t\t$this->_dependencies = $_inject->dependencies();\n" }
-      wtf(file) { "\t\t\t$this->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t$_res->_dependencies = $_inject->dependencies();\n" }
+      wtf(file) { "\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t$this->_query .= $_inject;\n" }
+      wtf(file) { "\t\t\t\t$_res->_query .= $_inject;\n" }
       wtf(file) { "\t\t\t} else {\n" }
-      wtf(file) { "\t\t\t\t$this->_query .= $_inject->query();\n" }
-      wtf(file) { "\t\t\t\t$this->_dependencies = array_merge($this->_dependencies, $_inject->dependencies());\n" }
+      wtf(file) { "\t\t\t\t$_res->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
-      wtf(file) { "\t\t\t$this->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else {\n" }
-      wtf(file) { "\t\t\t$this->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
-      wtf(file) { "\t\t\t$this->_dependencies = array_merge($this->_dependencies, $#{argument.name}->dependencies());\n" }
+      wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $#{argument.name}->dependencies());\n" }
       wtf(file) { "\t\t}\n" }
     end
     if complex_type.choices
-      wtf(file) { "\t\t$this->_query .= \"</$__namespace$_choice>\";\n" }
+      wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
     end
+    wtf(file) { "\t\treturn $_res;\n" }
   end
 
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
@@ -204,33 +207,34 @@ class PHPClass
         wtf(file) { " /* Nothing expected at $_inject. Please, provide null */\n" }
       end
     end
-    wtf(file) { "\tpublic function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
+    wtf(file) { "\tpublic static function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    wtf(file) { "\t\t$this->_query = \"\";\n" }
-    wtf(file) { "\t\t$this->_query .= \"<$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
+    wtf(file) { "\t\t$_res->_query .= \"<$__namespace$_choice>\";\n" }
     wtf(file) { "\t\tif ($_inject && is_string($_inject)) {\n" }
-    wtf(file) { "\t\t\t$this->_query .= $_inject;\n" }
+    wtf(file) { "\t\t\t$_res->_query .= $_inject;\n" }
     wtf(file) { "\t\t} else if ($_inject) {\n" }
-    wtf(file) { "\t\t\t$this->_query .= $_inject->query();\n" }
-    wtf(file) { "\t\t\t$this->_dependencies = array_merge($this->_dependencies, $_inject->dependencies());\n" }
+    wtf(file) { "\t\t\t$_res->_query .= $_inject->query();\n" }
+    wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
     wtf(file) { "\t\t}\n" }
-    wtf(file) { "\t\t$this->_query .= \"</$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\treturn $_res;\n" }
   end
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
     if complex_type.simple_content.attributes.empty?
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
     else
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}, $_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
   end
 
   def write_complex_type_with_attributes(file, complex_type_key, complex_type)
     if complex_type.attributes.empty?
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}($_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
     else
-      wtf(file) { "\n\tpublic function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}, $_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
   end
@@ -268,7 +272,7 @@ class PHPClass
     wtf(file) { "\n\t/**\n" }
     wtf(file) { "\t * Capable of writing the XML to a web browser by sending the content-type header.\n" }
     wtf(file) { "\t */" }
-    wtf(file) { "\n\tpublic function debugXML($xml) {\n" }
+    wtf(file) { "\n\tpublic static function debugXML($xml) {\n" }
     wtf(file) { "\t\theader(\"content-type: text/xml\");\n" }
     wtf(file) { "\t\techo $xml;\n" }
     wtf(file) { "\t}\n" }
