@@ -70,7 +70,9 @@ open("description", "a") { |f|
 FileUtils.chown_R username, group, repository_path
 
 # Add it to the git cache
-FileUtils.ln_s repository_path, "/var/cache/git/#{username}/#{repository_name}"
+git_cache = "/var/cache/git/#{username}"
+FileUtils.mkdir_p git_cache
+FileUtils.ln_s repository_path, "#{git_cache}/#{repository_name}"
 
 # Let's go back to the directory we were at
 FileUtils.cd pwd
