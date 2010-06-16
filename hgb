@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+#
+# Copyright (C) 2010 Rafael Fernández López <ereslibre@ereslibre.es>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+#
+# This script works when you have a layout of the style:
+#
+# project
+#     |- workingCopy
+#     |- featureX
+#     |- bug1234
+#     \- featureY
+#
+# The workflow is simple: always work on "workingCopy" folder.
+
+require "uri"
+require "fileutils"
+
+if ARGV.size != 1
+	puts "usage: #$0 branch"
+	Process.exit
+end
+
+hg_root = `hg root`.slice /^(.*)\n$/, 1 # remove trailing \n
+pwd = FileUtils.pwd
+
+FileUtils.cd hg_root
+
+repo_b = URI.split((URI.join "file://#{hg_root}", "#{ARGV[0]}").to_s)[5]
+
+`hg update null`
+FileUtils.mv ".hg", "#{repo_b}/.hg_aux"
+FileUtils.mv "#{repo_b}/.hg", "."
+FileUtils.mv "#{repo_b}/.hg_aux", "#{repo_b}/.hg"
+`hg update`
+
+FileUtils.cd pwd
