@@ -39,22 +39,20 @@
 #
 # mkdir myProject ; cd myProject
 #
-# hg init featureFoo
+# hg init .featureFoo
 # <commit stuff>
-# hg init featureBar
-# <commit stuff>
-# hg init featureBaz
+# hg init .featureBar
 # <commit stuff>
 #
 # mkdir workingCopy ; cd workingCopy
 #
-# hgb featureFoo
+# hgb featureFoo <-- switches to ".featureFoo" repository
 # hg log
 #
-# hgb featureBar
+# hgb featureBar <-- switches to ".featureBar" repository
 # hg log
 #
-# hgb featureBaz
+# hgb featureBaz <-- clones and later switches to ".featureBaz" repository
 # hg log
 #
 
@@ -67,16 +65,15 @@ if ARGV.size != 1
 end
 
 pwd = FileUtils.pwd
-repo_b = URI.split((URI.join "file://#{pwd}", "#{ARGV[0]}").to_s)[5]
+repo_b = URI.split((URI.join "file://#{pwd}", ".#{ARGV[0]}").to_s)[5]
 
 if File.exists? ".hg"
+	if !File.exists? "#{repo_b}"
+		`hg clone -U . #{repo_b}`
+		puts "current repository cloned at #{repo_b}"
+	end
 	`hg update null`
 	FileUtils.rm ".hg"
-end
-
-if !File.exists? "#{repo_b}/.hg"
-	puts "no hg repository found at #{repo_b}"
-	Process.exit
 end
 
 FileUtils.ln_s "#{repo_b}/.hg", "."
@@ -84,3 +81,5 @@ FileUtils.cd "#{repo_b}"
 `hg update null`
 FileUtils.cd pwd
 `hg update`
+
+puts "working copy now points to #{repo_b}"
