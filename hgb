@@ -19,15 +19,44 @@
 #
 
 #
-# This script works when you have a layout of the style:
+# There are branches which are repositories, and there is also the "working copy". The "working
+# copy" is just a directory whose ".hg" folder is a symbolic link to one of those repositories
+# that are behaving as branches.
 #
-# project
-#     |- workingCopy
-#     |- featureX
-#     |- bug1234
-#     \- featureY
+# Rocking points:
 #
-# The workflow is simple: always work on "workingCopy" folder.
+#     - You can work on a huge C/C++/whatever compiled project, and you don't have to start from
+#       scratch the build phase.
+#
+#     - It's simple. Your repos still point to the remote repos they were pointing. No big deals.
+#
+# Maybe not-that-rocking points:
+#
+#     - Each time you switch branches you are actually doing `hg update` what isn't specially cheap.
+#
+#
+# "I want my ice cream, tell me how to use it". OK, let's go with an example:
+#
+# mkdir myProject ; cd myProject
+#
+# hg init featureFoo
+# <commit stuff>
+# hg init featureBar
+# <commit stuff>
+# hg init featureBaz
+# <commit stuff>
+#
+# mkdir workingCopy ; cd workingCopy
+#
+# hgb featureFoo
+# hg log
+#
+# hgb featureBar
+# hg log
+#
+# hgb featureBaz
+# hg log
+#
 
 require "uri"
 require "fileutils"
