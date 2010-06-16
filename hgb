@@ -37,17 +37,13 @@ if ARGV.size != 1
 	Process.exit
 end
 
-hg_root = `hg root`.slice /^(.*)\n$/, 1 # remove trailing \n
 pwd = FileUtils.pwd
-
-FileUtils.cd hg_root
-
-repo_b = URI.split((URI.join "file://#{hg_root}", "#{ARGV[0]}").to_s)[5]
+repo_b = URI.split((URI.join "file://#{pwd}", "#{ARGV[0]}").to_s)[5]
 
 `hg update null`
-FileUtils.mv ".hg", "#{repo_b}/.hg_aux"
-FileUtils.mv "#{repo_b}/.hg", "."
-FileUtils.mv "#{repo_b}/.hg_aux", "#{repo_b}/.hg"
-`hg update`
-
+FileUtils.rm ".hg" if File.exists? ".hg"
+FileUtils.ln_s "#{repo_b}/.hg", "."
+FileUtils.cd "#{repo_b}"
+`hg update null`
 FileUtils.cd pwd
+`hg update`
