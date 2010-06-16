@@ -73,6 +73,12 @@ if File.exists? ".hg"
 	`hg update null`
 	FileUtils.rm ".hg"
 end
+
+if !File.exists? "#{repo_b}/.hg"
+	puts "no hg repository found at #{repo_b}"
+	Process.exit
+end
+
 FileUtils.ln_s "#{repo_b}/.hg", "."
 FileUtils.cd "#{repo_b}"
 `hg update null`
