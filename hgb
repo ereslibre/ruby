@@ -69,8 +69,10 @@ end
 pwd = FileUtils.pwd
 repo_b = URI.split((URI.join "file://#{pwd}", "#{ARGV[0]}").to_s)[5]
 
-`hg update null`
-FileUtils.rm ".hg" if File.exists? ".hg"
+if File.exists? ".hg"
+	`hg update null`
+	FileUtils.rm ".hg"
+end
 FileUtils.ln_s "#{repo_b}/.hg", "."
 FileUtils.cd "#{repo_b}"
 `hg update null`
