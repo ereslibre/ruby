@@ -121,7 +121,7 @@ class PHPClass
       wtf(file) { "\t\t} else {\n" }
       wtf(file) { "\t\t\t$_res->_query .= $#{element.name}->query();\n" }
       wtf(file) { "\t\t\t$_res->_dependencies = $#{element.name}->dependencies();\n" }
-      wtf(file) { "\t\t\tif (get_class($this) != get_class($#{element.name})) {\n" }
+      wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{element.name})) {\n" }
       wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
@@ -176,14 +176,14 @@ class PHPClass
       wtf(file) { "\t\t$_res->_query .= \"<$__namespace$_choice>\";\n" }
       wtf(file) { "\t\tif ($_inject) {\n" }
       wtf(file) { "\t\t\t$_res->_dependencies = $_inject->dependencies();\n" }
-      wtf(file) { "\t\t\tif (get_class($this) != get_class($_inject)) {\n" }
+      wtf(file) { "\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
       wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
       wtf(file) { "\t\t\t\t$_res->_query .= $_inject;\n" }
       wtf(file) { "\t\t\t} else {\n" }
       wtf(file) { "\t\t\t\t$_res->_query .= $_inject->query();\n" }
-      wtf(file) { "\t\t\t\tif (get_class($this) != get_class($_inject)) {\n" }
+      wtf(file) { "\t\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
       wtf(file) { "\t\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t\t}\n" }
       wtf(file) { "\t\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
@@ -196,7 +196,7 @@ class PHPClass
       wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else {\n" }
       wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
-      wtf(file) { "\t\t\tif (get_class($this) != get_class($#{argument.name})) {\n" }
+      wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $#{argument.name}->xml_namespace() . \"=\\\"\" . $#{argument.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $#{argument.name}->dependencies());\n" }
@@ -223,7 +223,7 @@ class PHPClass
     wtf(file) { "\t\t\t$_res->_query .= $_inject;\n" }
     wtf(file) { "\t\t} else if ($_inject) {\n" }
     wtf(file) { "\t\t\t$_res->_query .= $_inject->query();\n" }
-    wtf(file) { "\t\t\tif (get_class($this) != get_class($_inject)) {\n" }
+    wtf(file) { "\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
     wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
     wtf(file) { "\t\t\t}\n" }
     wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
@@ -258,7 +258,7 @@ class PHPClass
     wtf(file) { "\t * You will typically call this function on your last node, for getting a\n" }
     wtf(file) { "\t * complete XML request.\n" }
     wtf(file) { "\t */" }
-    wtf(file) { "\n\tpublic function generateXML($_inject, $_namespace = true) {\n" }
+    wtf(file) { "\n\tpublic function generateXML($_inject = null, $_namespace = false) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$dependencies = array_unique($this->_dependencies);\n" }
     wtf(file) { "\t\t$dependencyList = implode(\" \", $dependencies);\n" }
@@ -277,6 +277,7 @@ class PHPClass
     wtf(file) { "\t\tif ($_inject) {\n" }
     wtf(file) { "\t\t\t$res .= $_inject->query();\n" }
     wtf(file) { "\t\t}\n" }
+    wtf(file) { "\t\t$res .= $this->_query;\n" }
     wtf(file) { "\t\t$res .= \"</${__namespace}#{@xsd_class_name}>\";\n" }
     wtf(file) { "\t\treturn $res;\n" }
     wtf(file) { "\t}\n" }
