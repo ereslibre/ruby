@@ -118,7 +118,7 @@ class PHPClass
       wtf(file) { "\t\t$_res->_query = \"<${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\tif (is_string($#{element.name})) {\n" }
       wtf(file) { "\t\t\t$_res->_query .= $#{element.name};\n" }
-      wtf(file) { "\t\t} else {\n" }
+      wtf(file) { "\t\t} else if ($#{element.name}) {\n" }
       wtf(file) { "\t\t\t$_res->_query .= $#{element.name}->query();\n" }
       wtf(file) { "\t\t\t$_res->_dependencies = $#{element.name}->dependencies();\n" }
       wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{element.name})) {\n" }
@@ -181,7 +181,7 @@ class PHPClass
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
       wtf(file) { "\t\t\t\t$_res->_query .= $_inject;\n" }
-      wtf(file) { "\t\t\t} else {\n" }
+      wtf(file) { "\t\t\t} else if ($_inject) {\n" }
       wtf(file) { "\t\t\t\t$_res->_query .= $_inject->query();\n" }
       wtf(file) { "\t\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
       wtf(file) { "\t\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
@@ -194,7 +194,7 @@ class PHPClass
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
-      wtf(file) { "\t\t} else {\n" }
+      wtf(file) { "\t\t} else if ($#{argument.name}) {\n" }
       wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $#{argument.name}->xml_namespace() . \"=\\\"\" . $#{argument.name}->xml_referer() . \"\\\"\";\n" }
