@@ -262,7 +262,7 @@ class PHPClass
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$dependencies = array_unique($this->_dependencies);\n" }
     wtf(file) { "\t\t$dependencyList = implode(\" \", $dependencies);\n" }
-    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\"?>\";\n" }
+    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\"?>\\n\";\n" }
     wtf(file) { "\t\t$myself = \"\";\n" }
     wtf(file) { "\t\tif ($_namespace) {\n" }
     wtf(file) { "\t\t\t$myself = \"xmlns:#{@namespace}=\\\"#{@referer}\\\"\";\n" }
