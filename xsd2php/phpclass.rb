@@ -29,8 +29,13 @@ require "restriction"
 class Argument
 
   def to_s
+    if PHPClass.is_simple_type @type
+        printType = "#{@type} (simple type)"
+    else
+        printType = "#{@type} (complex type)"
+    end
     if @type
-      "$#{@name} /* #{@type} */"
+      "$#{@name} /* #{printType} */"
     else
       "$#{@name}"
     end
@@ -41,18 +46,31 @@ end
 class Attribute
 
   def to_s
-    return "$#{@name} /* #{@type} */" if !@default
-    "$#{@name} = \"#{@default}\" /* #{@type} */"
+    if PHPClass.is_simple_type @type
+        printType = "#{@type} (simple type)"
+    else
+        printType = "#{@type} (complex type)"
+    end
+    return "$#{@name} /* #{printType} */" if !@default
+    "$#{@name} = \"#{@default}\" /* #{printType} */"
   end
 
 end
 
 class PHPClass
 
-  attr_reader :xsd_class_name, :namespace, :referer, :simple_types, :complex_types, :elements
+  attr_reader :xsd_class_name, :namespace, :referer, :elements
 
   @@simple_types = Hash.new
   @@complex_types = Hash.new
+
+  def self.is_complex_type(type)
+      @@complex_types.has_key? type
+  end
+
+  def self.is_simple_type(type)
+      @@simple_types.has_key? type
+  end
 
   def type(type_name)
     return @@complex_types[type_name] if @@complex_types.has_key? type_name
@@ -243,6 +261,7 @@ class PHPClass
     end
     wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
     for attribute in complex_type.simple_content.attributes
+        wtf(file) { "\t\t// Complex type base: #{attribute.type}\n" }
         wtf(file) { "\t\tif (is_string($#{attribute.name})) {\n" }
         wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}\\\"\";\n" }
         wtf(file) { "\t\t}\n" }
