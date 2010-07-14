@@ -196,8 +196,9 @@ class PHPClass
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else if ($#{argument.name}) {\n" }
+      wtf(file) { "\t\t\t$__query = $#{argument.name}->query();\n" }
       wtf(file) { "\t\t\t$__attributes = $#{argument.name}->attributes();\n" }
-      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attributes}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attributes}>${__query}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t\tif (get_class($__res) != get_class($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $#{argument.name}->xml_namespace() . \"=\\\"\" . $#{argument.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
@@ -244,8 +245,6 @@ class PHPClass
     for attribute in complex_type.simple_content.attributes
         wtf(file) { "\t\tif (is_string($#{attribute.name})) {\n" }
         wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}\\\"\";\n" }
-        wtf(file) { "\t\t} else if ($#{attribute.name}) {\n" }
-        wtf(file) { "\t\t\t$__res->_attributes .= $#{attribute.name}->attributes();\n" }
         wtf(file) { "\t\t}\n" }
     end
     wtf(file) { "\t\treturn $__res;\n" }
