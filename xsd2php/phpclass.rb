@@ -270,26 +270,26 @@ class PHPClass
     wtf(file) { "\t */" }
     wtf(file) { "\n\tpublic function generateXML($_inject = null, $_namespace = false) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    wtf(file) { "\t\t$dependencies = array_unique($this->_dependencies);\n" }
-    wtf(file) { "\t\t$dependencyList = implode(\" \", $dependencies);\n" }
-    wtf(file) { "\t\t$res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\"?>\\n\";\n" }
-    wtf(file) { "\t\t$myself = \"\";\n" }
+    wtf(file) { "\t\t$__dependencies = array_unique($this->_dependencies);\n" }
+    wtf(file) { "\t\t$__dependencyList = implode(\" \", $__dependencies);\n" }
+    wtf(file) { "\t\t$__res = \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" standalone=\\\"no\\\"?>\\n\";\n" }
+    wtf(file) { "\t\t$__myself = \"\";\n" }
     wtf(file) { "\t\tif ($_namespace) {\n" }
-    wtf(file) { "\t\t\t$myself = \"xmlns:#{@namespace}=\\\"#{@referer}\\\"\";\n" }
+    wtf(file) { "\t\t\t$__myself = \"xmlns:#{@namespace}=\\\"#{@referer}\\\"\";\n" }
     wtf(file) { "\t\t} else {\n" }
-    wtf(file) { "\t\t\t$myself = \"xmlns=\\\"#{@referer}\\\"\";\n" }
+    wtf(file) { "\t\t\t$__myself = \"xmlns=\\\"#{@referer}\\\"\";\n" }
     wtf(file) { "\t\t}\n" }
-    wtf(file) { "\t\tif (empty($dependencyList)) {\n" }
-    wtf(file) { "\t\t\t$res .= \"<${__namespace}#{@xsd_class_name} $myself>\";\n" }
+    wtf(file) { "\t\tif (empty($__dependencyList)) {\n" }
+    wtf(file) { "\t\t\t$__res .= \"<${__namespace}#{@xsd_class_name} $__myself>\";\n" }
     wtf(file) { "\t\t} else {\n" }
-    wtf(file) { "\t\t\t$res .= \"<${__namespace}#{@xsd_class_name} $myself $dependencyList>\";\n" }
+    wtf(file) { "\t\t\t$__res .= \"<${__namespace}#{@xsd_class_name} $__myself $__dependencyList>\";\n" }
     wtf(file) { "\t\t}\n" }
     wtf(file) { "\t\tif ($_inject) {\n" }
-    wtf(file) { "\t\t\t$res .= $_inject->query();\n" }
+    wtf(file) { "\t\t\t$__res .= $_inject->query();\n" }
     wtf(file) { "\t\t}\n" }
-    wtf(file) { "\t\t$res .= $this->_query;\n" }
-    wtf(file) { "\t\t$res .= \"</${__namespace}#{@xsd_class_name}>\";\n" }
-    wtf(file) { "\t\treturn $res;\n" }
+    wtf(file) { "\t\t$__res .= $this->_query;\n" }
+    wtf(file) { "\t\t$__res .= \"</${__namespace}#{@xsd_class_name}>\";\n" }
+    wtf(file) { "\t\treturn $__res;\n" }
     wtf(file) { "\t}\n" }
     wtf(file) { "\n\t/**\n" }
     wtf(file) { "\t * Capable of writing the XML to a web browser by sending the content-type header.\n" }
