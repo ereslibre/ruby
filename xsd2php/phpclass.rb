@@ -101,7 +101,8 @@ class PHPClass
     write_header(file, @namespace)
     wtf(file) { "class #{@xsd_class_name}\n{\n" }
     wtf(file) { "\n\tprivate $_dependencies = array();" }
-    wtf(file) { "\n\tprivate $_query = \"\";\n" }
+    wtf(file) { "\n\tprivate $_query = \"\";" }
+    wtf(file) { "\n\tprivate $_attributes = \"\";\n" }
     write_xml_generator(file)
     write_elements(file, php_classes)
     wtf(file) { "\n}\n\n?>\n" }
@@ -114,19 +115,19 @@ class PHPClass
     for element in @elements
       wtf(file) { "\n\tpublic static function do_#{element.name}($#{element.name} /* #{element.type} */, $_namespace = true) {\n" }
       wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-      wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
-      wtf(file) { "\t\t$_res->_query = \"<${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
+      wtf(file) { "\t\t$__res->_query = \"<${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\tif (is_string($#{element.name})) {\n" }
-      wtf(file) { "\t\t\t$_res->_query .= $#{element.name};\n" }
+      wtf(file) { "\t\t\t$__res->_query .= $#{element.name};\n" }
       wtf(file) { "\t\t} else if ($#{element.name}) {\n" }
-      wtf(file) { "\t\t\t$_res->_query .= $#{element.name}->query();\n" }
-      wtf(file) { "\t\t\t$_res->_dependencies = $#{element.name}->dependencies();\n" }
-      wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{element.name})) {\n" }
-      wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t$__res->_query .= $#{element.name}->query();\n" }
+      wtf(file) { "\t\t\t$__res->_dependencies = $#{element.name}->dependencies();\n" }
+      wtf(file) { "\t\t\tif (get_class($__res) != get_class($#{element.name})) {\n" }
+      wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $#{element.name}->xml_namespace() . \"=\\\"\" . $#{element.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
-      wtf(file) { "\t\t$_res->_query .= \"</${__namespace}#{element.name}>\";\n" }
-      wtf(file) { "\t\treturn $_res;\n" }
+      wtf(file) { "\t\t$__res->_query .= \"</${__namespace}#{element.name}>\";\n" }
+      wtf(file) { "\t\treturn $__res;\n" }
       wtf(file) { "\t}\n" }
     end
     for complex_type_key, complex_type in @complex_types
@@ -171,38 +172,39 @@ class PHPClass
       wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{totalArguments.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
+    wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
     if complex_type.choices
-      wtf(file) { "\t\t$_res->_query .= \"<$__namespace$_choice>\";\n" }
+      wtf(file) { "\t\t$__res->_query .= \"<$__namespace$_choice>\";\n" }
       wtf(file) { "\t\tif ($_inject) {\n" }
-      wtf(file) { "\t\t\t$_res->_dependencies = $_inject->dependencies();\n" }
-      wtf(file) { "\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t$__res->_dependencies = $_inject->dependencies();\n" }
+      wtf(file) { "\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
+      wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t$_res->_query .= $_inject;\n" }
+      wtf(file) { "\t\t\t\t$__res->_query .= $_inject;\n" }
       wtf(file) { "\t\t\t} else if ($_inject) {\n" }
-      wtf(file) { "\t\t\t\t$_res->_query .= $_inject->query();\n" }
-      wtf(file) { "\t\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t\t$__res->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t\t}\n" }
-      wtf(file) { "\t\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
+      wtf(file) { "\t\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $_inject->dependencies());\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
-      wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
+      wtf(file) { "\t\t$__res->_query .= \"</$__namespace$_choice>\";\n" }
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
-      wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else if ($#{argument.name}) {\n" }
-      wtf(file) { "\t\t\t$_res->_query .= \"<${__namespace}#{argument.name}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
-      wtf(file) { "\t\t\tif (get_class($_res) != get_class($#{argument.name})) {\n" }
-      wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $#{argument.name}->xml_namespace() . \"=\\\"\" . $#{argument.name}->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t$__attributes = $#{argument.name}->attributes();\n" }
+      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attributes}>\" . $#{argument.name}->query() . \"</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\tif (get_class($__res) != get_class($#{argument.name})) {\n" }
+      wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $#{argument.name}->xml_namespace() . \"=\\\"\" . $#{argument.name}->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t}\n" }
-      wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $#{argument.name}->dependencies());\n" }
+      wtf(file) { "\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $#{argument.name}->dependencies());\n" }
       wtf(file) { "\t\t}\n" }
     end
-    wtf(file) { "\t\treturn $_res;\n" }
+    wtf(file) { "\t\treturn $__res;\n" }
   end
 
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
@@ -217,19 +219,19 @@ class PHPClass
     end
     wtf(file) { "\tpublic static function create_#{complex_type_key}($_choice, $_inject, $_namespace = true) {\n" }
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    wtf(file) { "\t\t$_res = new #{@xsd_class_name}();\n" }
-    wtf(file) { "\t\t$_res->_query .= \"<$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
+    wtf(file) { "\t\t$__res->_query .= \"<$__namespace$_choice>\";\n" }
     wtf(file) { "\t\tif ($_inject && is_string($_inject)) {\n" }
-    wtf(file) { "\t\t\t$_res->_query .= $_inject;\n" }
+    wtf(file) { "\t\t\t$__res->_query .= $_inject;\n" }
     wtf(file) { "\t\t} else if ($_inject) {\n" }
-    wtf(file) { "\t\t\t$_res->_query .= $_inject->query();\n" }
-    wtf(file) { "\t\t\tif (get_class($_res) != get_class($_inject)) {\n" }
-    wtf(file) { "\t\t\t\t$_res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
+    wtf(file) { "\t\t\t$__res->_query .= $_inject->query();\n" }
+    wtf(file) { "\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
+    wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
     wtf(file) { "\t\t\t}\n" }
-    wtf(file) { "\t\t\t$_res->_dependencies = array_merge($_res->_dependencies, $_inject->dependencies());\n" }
+    wtf(file) { "\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $_inject->dependencies());\n" }
     wtf(file) { "\t\t}\n" }
-    wtf(file) { "\t\t$_res->_query .= \"</$__namespace$_choice>\";\n" }
-    wtf(file) { "\t\treturn $_res;\n" }
+    wtf(file) { "\t\t$__res->_query .= \"</$__namespace$_choice>\";\n" }
+    wtf(file) { "\t\treturn $__res;\n" }
   end
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
@@ -238,7 +240,15 @@ class PHPClass
     else
       wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}, $_namespace = true) {\n" }
     end
-    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
+    wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
+    for attribute in complex_type.simple_content.attributes
+        wtf(file) { "\t\tif (is_string($#{attribute.name})) {\n" }
+        wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}\\\"\";\n" }
+        wtf(file) { "\t\t} else if ($#{attribute.name}) {\n" }
+        wtf(file) { "\t\t\t$__res->_attributes .= $#{attribute.name}->attributes();\n" }
+        wtf(file) { "\t\t}\n" }
+    end
+    wtf(file) { "\t\treturn $__res;\n" }
   end
 
   def write_complex_type_with_attributes(file, complex_type_key, complex_type)
@@ -248,6 +258,7 @@ class PHPClass
       wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
+    # TODO
   end
 
   def write_xml_generator(file)
@@ -300,6 +311,12 @@ class PHPClass
     wtf(file) { "\t */" }
     wtf(file) { "\n\tpublic function query() {\n" }
     wtf(file) { "\t\treturn $this->_query;\n" }
+    wtf(file) { "\t}\n" }
+    wtf(file) { "\n\t/**\n" }
+    wtf(file) { "\t * Returns the current attributes.\n" }
+    wtf(file) { "\t */" }
+    wtf(file) { "\n\tpublic function attributes() {\n" }
+    wtf(file) { "\t\treturn $this->_attributes;\n" }
     wtf(file) { "\t}\n" }
     wtf(file) { "\n\t/**\n" }
     wtf(file) { "\t * Returns the referer of this XML entity.\n" }
