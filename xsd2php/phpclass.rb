@@ -48,11 +48,20 @@ class Attribute
   def to_s
     if PHPClass.is_simple_type @type
         printType = "#{@type} (simple type)"
-    else
+    elsif PHPClass.is_complex_type @type
         printType = "#{@type} (complex type)"
+    else
+        printType = nil
     end
-    return "$#{@name} /* #{printType} */" if !@default
-    "$#{@name} = \"#{@default}\" /* #{printType} */"
+    if @default and printType
+        "$#{@name} = \"#{@default}\" /* #{printType} */"
+    elsif !@default and printType
+        "$#{@name} /* #{printType} */"
+    elsif @default and !printType
+        "$#{@name} = \"#{@default}\""
+    else
+        "$#{@name}"
+    end
   end
 
 end
