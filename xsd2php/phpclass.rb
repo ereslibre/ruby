@@ -255,15 +255,31 @@ class PHPClass
 
   def write_complex_type_with_simple_content(file, complex_type_key, complex_type)
     if complex_type.simple_content.attributes.empty?
-      wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}() {\n" }
     else
-      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.simple_content.attributes.join(", ")}, $_namespace = true) {\n" }
+      elements = Array.new
+      for attribute in complex_type.simple_content.attributes
+          elements << attribute
+          newAttribute = Attribute.new("#{attribute.name}Attr", attribute.type, attribute.use, attribute.default)
+          newAttribute.type = nil
+          elements << newAttribute
+          attribute.default = nil
+      end
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{elements.join(", ")}) {\n" }
     end
     wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
     for attribute in complex_type.simple_content.attributes
-        wtf(file) { "\t\t// Complex type base: #{attribute.type}\n" }
         wtf(file) { "\t\tif (is_string($#{attribute.name})) {\n" }
-        wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}\\\"\";\n" }
+        wtf(file) { "\t\t\t$__res->_query .= $#{attribute.name};\n" }
+        wtf(file) { "\t\t} else if ($#{attribute.name}) {\n" }
+        wtf(file) { "\t\t\t$__res->_query .= $#{attribute.name}->query();\n" }
+        wtf(file) { "\t\t\tif (get_class($__res) != get_class($#{attribute.name})) {\n" }
+        wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $#{attribute.name}->xml_namespace() . \"=\\\"\" . $#{attribute.name}->xml_referer() . \"\\\"\";\n" }
+        wtf(file) { "\t\t\t}\n" }
+        wtf(file) { "\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $#{attribute.name}->dependencies());\n" }
+        wtf(file) { "\t\t}\n" }
+        wtf(file) { "\t\tif (is_string($#{attribute.name}Attr)) {\n" }
+        wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}Attr\\\"\";\n" }
         wtf(file) { "\t\t}\n" }
     end
     wtf(file) { "\t\treturn $__res;\n" }

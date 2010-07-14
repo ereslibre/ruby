@@ -33,6 +33,7 @@ end
 class Attribute
 
   attr_reader :name, :type, :use, :default
+  attr_writer :type, :default
 
   def initialize(name, type, use, default)
     @name = name
