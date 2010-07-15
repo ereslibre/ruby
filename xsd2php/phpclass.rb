@@ -222,6 +222,18 @@ class PHPClass
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
       wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t} else if (is_array($#{argument.name})) {\n" }
+      wtf(file) { "\t\t\tforeach ($#{argument.name} as $_#{argument.name}) {\n" }
+      wtf(file) { "\t\t\t\tif (is_string($_#{argument.name})) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= $_#{argument.name};\n" }
+      wtf(file) { "\t\t\t\t} else if ($_#{argument.name}) {\n" }
+      wtf(file) { "\t\t\t\t\t$__attributes = $_#{argument.name}->attributes();\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attributes}>\";\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= $_#{argument.name}->query();\n" }
+      wtf(file) { "\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t\t$__res->_query .= \"</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t} else if ($#{argument.name}) {\n" }
       wtf(file) { "\t\t\t$__query = $#{argument.name}->query();\n" }
       wtf(file) { "\t\t\t$__attributes = $#{argument.name}->attributes();\n" }
