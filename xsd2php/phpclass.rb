@@ -294,8 +294,8 @@ class PHPClass
       wtf(file) { "\t\tif (is_string($#{attribute.name}Attr)) {\n" }
       wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}Attr\\\"\";\n" }
       wtf(file) { "\t\t}\n" }
-      wtf(file) { "\t\treturn $__res;\n" }
     end if attributeList
+    wtf(file) { "\t\treturn $__res;\n" }
   end
 
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
