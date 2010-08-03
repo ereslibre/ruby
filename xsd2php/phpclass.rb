@@ -66,6 +66,24 @@ class Attribute
 
 end
 
+class CodeAttribute < Attribute
+
+    def to_s
+        "#{@name}=\"$#{@name}\""
+    end
+
+    def to_s2
+        if @default
+            "$#{@name} = \"#{@default}\""
+        elsif !@use == "required"
+            "$#{@name} = null"
+        else
+            "$#{@name}"
+        end
+    end
+
+end
+
 class PHPClass
 
   attr_reader :xsd_class_name, :namespace, :referer, :elements
@@ -165,8 +183,6 @@ class PHPClass
         write_complex_type_with_choices file, complex_type_key, complex_type
       elsif complex_type.simple_content
         write_complex_type_with_simple_content file, complex_type_key, complex_type
-      elsif complex_type.attributes
-        write_complex_type_with_attributes file, complex_type_key, complex_type
       else
         correct = false
         puts "!!! Unknown complex type information (#{complex_type_key})"
@@ -178,10 +194,16 @@ class PHPClass
   end
 
   def write_complex_type_with_arguments(file, complex_type_key, complex_type)
+    if complex_type.attributes
+      attributeList = Array.new
+      for attribute in complex_type.attributes
+        attributeList << CodeAttribute.new(attribute.name, attribute.type, attribute.use, attribute.default)
+      end
+    end
+
     if complex_type.arguments.empty? && complex_type.choices.empty?
       wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
     else
-
       for choice in complex_type.choices
         wtf(file) { "\n\tconst #{complex_type_key}_#{choice.name.upcase} = \"#{choice.name}\";" }
         if choice.type
@@ -196,7 +218,12 @@ class PHPClass
         totalArguments << Argument.new("_inject", nil, nil)
       end
       totalArguments << complex_type.arguments
-      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{totalArguments.join(", ")}, $_namespace = true) {\n" }
+      if attributeList
+        args = totalArguments.concat(attributeList.map { |e| e.to_s2 }).join(", ")
+      else
+        args = totalArguments.join(", ")
+      end
+      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{args}, $_namespace = true) {\n" }
     end
     wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
     wtf(file) { "\t\t$__res = new #{@xsd_class_name}();\n" }
@@ -221,7 +248,7 @@ class PHPClass
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
-      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name} #{attributeList * " " if attributeList}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else if (is_array($#{argument.name})) {\n" }
       wtf(file) { "\t\t\tforeach ($#{argument.name} as $_#{argument.name}) {\n" }
       wtf(file) { "\t\t\t\tif (is_string($_#{argument.name})) {\n" }
@@ -304,16 +331,6 @@ class PHPClass
         wtf(file) { "\t\t}\n" }
     end
     wtf(file) { "\t\treturn $__res;\n" }
-  end
-
-  def write_complex_type_with_attributes(file, complex_type_key, complex_type)
-    if complex_type.attributes.empty?
-      wtf(file) { "\n\tpublic static function create_#{complex_type_key}($_namespace = true) {\n" }
-    else
-      wtf(file) { "\n\tpublic static function create_#{complex_type_key}(#{complex_type.attributes.join(", ")}, $_namespace = true) {\n" }
-    end
-    wtf(file) { "\t\t$__namespace = $_namespace ? \"#{@namespace}:\" : \"\";\n" }
-    # TODO
   end
 
   def write_xml_generator(file)
