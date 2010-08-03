@@ -69,16 +69,35 @@ end
 class CodeAttribute < Attribute
 
     def to_s
-        "#{@name}=\"$#{@name}\""
+        "#{@name}=\\\"$#{@name}\\\""
     end
 
     def to_s2
-        if @default
-            "$#{@name} = \"#{@default}\""
-        elsif !@use == "required"
-            "$#{@name} = null"
+        if PHPClass.is_simple_type @type
+            printType = "#{@type} (simple type)"
+        elsif PHPClass.is_complex_type @type
+            printType = "#{@type} (complex type)"
         else
-            "$#{@name}"
+            printType = nil
+        end
+        if @default
+            if printType
+                "$#{@name} = \"#{@default}\" /* #{printType} */"
+            else
+                "$#{@name} = \"#{@default}\""
+            end
+        elsif !@use == "required"
+            if printType
+                "$#{@name} = null /* #{printType} */"
+            else
+                "$#{@name} = null"
+            end
+        else
+            if printType
+                "$#{@name} /* #{printType} */"
+            else
+                "$#{@name}"
+            end
         end
     end
 
@@ -248,7 +267,17 @@ class PHPClass
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
-      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name} #{attributeList * " " if attributeList}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      if attributeList
+        wtf(file) { "\t\t\t$__attrib = \"\";\n" }
+        for attribute in attributeList
+          wtf(file) { "\t\t\tif ($#{attribute.name}) {\n" }
+          wtf(file) { "\t\t\t\t$__attrib .= \" #{attribute.to_s}\";\n" }
+          wtf(file) { "\t\t\t}\n" }
+        end
+        wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attrib}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      else
+        wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
+      end
       wtf(file) { "\t\t} else if (is_array($#{argument.name})) {\n" }
       wtf(file) { "\t\t\tforeach ($#{argument.name} as $_#{argument.name}) {\n" }
       wtf(file) { "\t\t\t\tif (is_string($_#{argument.name})) {\n" }
