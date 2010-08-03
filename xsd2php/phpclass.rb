@@ -69,7 +69,7 @@ end
 class CodeAttribute < Attribute
 
     def to_s
-        "#{@name}=\\\"$#{@name}\\\""
+        "#{@name}=\\\"$#{@name}Attr\\\""
     end
 
     def to_s2
@@ -82,21 +82,21 @@ class CodeAttribute < Attribute
         end
         if @default
             if printType
-                "$#{@name} = \"#{@default}\" /* #{printType} */"
+                "$#{@name}Attr = \"#{@default}\" /* #{printType} */"
             else
-                "$#{@name} = \"#{@default}\""
+                "$#{@name}Attr = \"#{@default}\""
             end
         elsif !@use == "required"
             if printType
-                "$#{@name} = null /* #{printType} */"
+                "$#{@name}Attr = null /* #{printType} */"
             else
-                "$#{@name} = null"
+                "$#{@name}Attr = null"
             end
         else
             if printType
-                "$#{@name} /* #{printType} */"
+                "$#{@name}Attr /* #{printType} */"
             else
-                "$#{@name}"
+                "$#{@name}Attr"
             end
         end
     end
@@ -267,17 +267,7 @@ class PHPClass
     end
     for argument in complex_type.arguments
       wtf(file) { "\t\tif (is_string($#{argument.name})) {\n" }
-      if attributeList
-        wtf(file) { "\t\t\t$__attrib = \"\";\n" }
-        for attribute in attributeList
-          wtf(file) { "\t\t\tif ($#{attribute.name}) {\n" }
-          wtf(file) { "\t\t\t\t$__attrib .= \" #{attribute.to_s}\";\n" }
-          wtf(file) { "\t\t\t}\n" }
-        end
-        wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}${__attrib}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
-      else
-        wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
-      end
+      wtf(file) { "\t\t\t$__res->_query .= \"<${__namespace}#{argument.name}>$#{argument.name}</${__namespace}#{argument.name}>\";\n" }
       wtf(file) { "\t\t} else if (is_array($#{argument.name})) {\n" }
       wtf(file) { "\t\t\tforeach ($#{argument.name} as $_#{argument.name}) {\n" }
       wtf(file) { "\t\t\t\tif (is_string($_#{argument.name})) {\n" }
@@ -300,7 +290,12 @@ class PHPClass
       wtf(file) { "\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $#{argument.name}->dependencies());\n" }
       wtf(file) { "\t\t}\n" }
     end
-    wtf(file) { "\t\treturn $__res;\n" }
+    for attribute in attributeList
+      wtf(file) { "\t\tif (is_string($#{attribute.name}Attr)) {\n" }
+      wtf(file) { "\t\t\t$__res->_attributes .= \" #{attribute.name}=\\\"$#{attribute.name}Attr\\\"\";\n" }
+      wtf(file) { "\t\t}\n" }
+      wtf(file) { "\t\treturn $__res;\n" }
+    end if attributeList
   end
 
   def write_complex_type_with_choices(file, complex_type_key, complex_type)
