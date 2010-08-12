@@ -32,12 +32,18 @@ end
 
 SSH_COMMAND = "ssh"
 HOST = "localhost"
-COMMAND = "/home/ereslibre/proyectos/ruby/remoteExec serve"
+COMMAND = "remoteExec serve"
 CLIENT_VERSION = "0.1"
 
 cmd = IO.popen "#{SSH_COMMAND} #{HOST} '#{COMMAND}'"
+ret = cmd.gets
 
-hostVersion = cmd.gets.split("\n")[0]
+if ret == nil
+  puts "!!! No remoteExec found on host"
+  Process.exit
+end
+
+hostVersion = ret.split("\n")[0]
 
 s = TCPSocket.open(HOST, PORT)
 
