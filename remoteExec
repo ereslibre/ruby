@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+require 'socket'
+
+PORT = 8000
+
+############################################################################################# Server
+
+SERVER_VERSION = "0.1"
+
+if ARGV.size == 1
+  pid = fork do
+    server = TCPServer.open(PORT)
+    puts SERVER_VERSION
+    $stdout.flush
+    client = server.accept
+    cmd = client.gets
+    if cmd == "Bye"
+      Process.exit
+    end
+    client.puts "Welcome to the server !"
+    client.close
+  end
+
+  Process.detach pid
+  Process.exit
+end
+
+############################################################################################# Server
+
+############################################################################################# Client
+
+SSH_COMMAND = "ssh"
+HOST = "localhost"
+COMMAND = "/home/ereslibre/test serve"
+CLIENT_VERSION = "0.1"
+
+cmd = IO.popen "#{SSH_COMMAND} #{HOST} '#{COMMAND}'"
+
+hostVersion = cmd.gets.split("\n")[0]
+
+s = TCPSocket.open(HOST, PORT)
+
+if hostVersion != CLIENT_VERSION
+  puts "!!! Versions do not match (client = #{CLIENT_VERSION}; host = #{hostVersion})"
+  s.puts "Bye"
+  s.close
+  Process.exit
+end
+
+s.puts "Hello"
+s.flush
+while line = s.gets
+  puts line.chop
+end
+s.close
+
+############################################################################################# Client
