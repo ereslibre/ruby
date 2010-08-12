@@ -30,9 +30,9 @@ end
 
 ############################################################################################# Client
 
-SSH_COMMAND = "ssh"
-HOST = "localhost"
-COMMAND = "remoteExec serve"
+SSH_COMMAND    = "ssh"
+HOST           = "localhost"
+COMMAND        = "remoteExec serve"
 CLIENT_VERSION = "0.1"
 
 cmd = IO.popen "#{SSH_COMMAND} #{HOST} '#{COMMAND}'"
