@@ -183,6 +183,12 @@ class PHPClass
       wtf(file) { "\t\t$__res->_query = \"<${__namespace}#{element.name}>\";\n" }
       wtf(file) { "\t\tif (is_string($#{element.name})) {\n" }
       wtf(file) { "\t\t\t$__res->_query .= $#{element.name};\n" }
+      wtf(file) { "\t\t} else if (is_array($#{element.name})) {\n" }
+      wtf(file) { "\t\t\tforeach ($#{element.name} as $_#{element.name}) {\n" }
+      wtf(file) { "\t\t\t\tif ($_#{element.name}) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= $_#{element.name}->query();\n" }
+      wtf(file) { "\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t} else if ($#{element.name}) {\n" }
       wtf(file) { "\t\t\t$__res->_query .= $#{element.name}->query();\n" }
       wtf(file) { "\t\t\t$__res->_dependencies = $#{element.name}->dependencies();\n" }
