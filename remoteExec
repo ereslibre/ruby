@@ -32,7 +32,7 @@ end
 
 SSH_COMMAND = "ssh"
 HOST = "localhost"
-COMMAND = "/home/ereslibre/test serve"
+COMMAND = "/home/ereslibre/proyectos/ruby/remoteExec serve"
 CLIENT_VERSION = "0.1"
 
 cmd = IO.popen "#{SSH_COMMAND} #{HOST} '#{COMMAND}'"
