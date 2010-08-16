@@ -18,6 +18,8 @@ posts.insert("user" => users.find_one("username" => "ereslibre")["_id"],
 posts.insert("user" => users.find_one("username" => "foobar")["_id"],
              "title" => "Title foobar")
 
+users.update({ "username" => "ereslibre" }, { "$set" => { "name" => "Rafa" } })
+
 users.find().each { |user|
   puts "Posts by #{user["name"]} (#{user["username"]})"
   posts.find("user" => user["_id"]).each { |post|
