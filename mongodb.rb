@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 require "mongo"
+require "json"
 
 connection = Mongo::Connection.new
 db = connection["test"]
@@ -23,7 +24,7 @@ users.update({ "username" => "ereslibre" }, { "$set" => { "name" => "Rafa" } })
 users.find().each { |user|
   puts "Posts by #{user["name"]} (#{user["username"]})"
   posts.find("user" => user["_id"]).each { |post|
-    puts post["title"]
+    puts post.to_json
   }
 }
 
