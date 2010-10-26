@@ -255,18 +255,36 @@ class PHPClass
     if complex_type.choices
       wtf(file) { "\t\t$__res->_query .= \"<$__namespace$_choice>\";\n" }
       wtf(file) { "\t\tif ($_inject) {\n" }
-      wtf(file) { "\t\t\t$__res->_dependencies = $_inject->dependencies();\n" }
-      wtf(file) { "\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
-      wtf(file) { "\t\t\t}\n" }
-      wtf(file) { "\t\t\tif (is_string($_inject)) {\n" }
-      wtf(file) { "\t\t\t\t$__res->_query .= $_inject;\n" }
-      wtf(file) { "\t\t\t} else if ($_inject) {\n" }
-      wtf(file) { "\t\t\t\t$__res->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\tif (is_array($_inject)) {\n" }
+      wtf(file) { "\t\t\t\tforeach ($_inject as $__inject) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_dependencies = $__inject->dependencies();\n" }
+      wtf(file) { "\t\t\t\t\tif (get_class($__res) != get_class($__inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $__inject->xml_namespace() . \"=\\\"\" . $__inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t\t\tif (is_string($__inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t\t$__res->_query .= $__inject;\n" }
+      wtf(file) { "\t\t\t\t\t} else if ($__inject) {\n" }
+      wtf(file) { "\t\t\t\t\t\t$__res->_query .= $__inject->query();\n" }
+      wtf(file) { "\t\t\t\t\t\tif (get_class($__res) != get_class($__inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $__inject->xml_namespace() . \"=\\\"\" . $__inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $__inject->dependencies());\n" }
+      wtf(file) { "\t\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t} else {\n" }
+      wtf(file) { "\t\t\t\t$__res->_dependencies = $_inject->dependencies();\n" }
       wtf(file) { "\t\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
       wtf(file) { "\t\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
       wtf(file) { "\t\t\t\t}\n" }
-      wtf(file) { "\t\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $_inject->dependencies());\n" }
+      wtf(file) { "\t\t\t\tif (is_string($_inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= $_inject;\n" }
+      wtf(file) { "\t\t\t\t} else if ($_inject) {\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_query .= $_inject->query();\n" }
+      wtf(file) { "\t\t\t\t\tif (get_class($__res) != get_class($_inject)) {\n" }
+      wtf(file) { "\t\t\t\t\t\t$__res->_dependencies[] = \"xmlns:\" . $_inject->xml_namespace() . \"=\\\"\" . $_inject->xml_referer() . \"\\\"\";\n" }
+      wtf(file) { "\t\t\t\t\t}\n" }
+      wtf(file) { "\t\t\t\t\t$__res->_dependencies = array_merge($__res->_dependencies, $_inject->dependencies());\n" }
+      wtf(file) { "\t\t\t\t}\n" }
       wtf(file) { "\t\t\t}\n" }
       wtf(file) { "\t\t}\n" }
       wtf(file) { "\t\t$__res->_query .= \"</$__namespace$_choice>\";\n" }
